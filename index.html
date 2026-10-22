@@ -69,8 +69,15 @@ h1 span { color: var(--accent); }
   padding: 7px 18px; border-radius: 7px; cursor: pointer;
 }
 .tabs button[aria-selected="true"] { background: var(--accent); color: var(--surface); }
-.field { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
-.field input { width: 64px; }
+.settings { display: grid; grid-template-columns: 1.3fr repeat(3, minmax(0, 1fr)); gap: 10px; }
+.rate { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: grid; gap: 6px; align-content: start; }
+.rate.main { border-color: var(--accent); background: var(--accent-soft); }
+.rate .lbl { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.rate .row { display: flex; align-items: center; gap: 8px; color: var(--muted); }
+.rate .row.num { color: var(--ink); }
+.rate input.in { font-size: 18px; max-width: 170px; }
+.rate.main input.in { background: var(--surface); }
+.rate .small { font-size: 12px; color: var(--muted); }
 .btn {
   font: 500 13px var(--font-body); color: var(--ink); background: var(--surface);
   border: 1px solid var(--line); border-radius: 8px; padding: 7px 12px; cursor: pointer;
@@ -128,6 +135,7 @@ td.qty { width: 110px; }
 td.price { width: 190px; }
 td.cost { width: 170px; }
 tr.total td { font-weight: 600; background: var(--surface-2); }
+tr.raw td { color: var(--muted); }
 tr.avg td { font-weight: 600; color: var(--accent); }
 
 footer { color: var(--muted); font-size: 13px; display: grid; gap: 4px; }
@@ -135,6 +143,8 @@ footer { color: var(--muted); font-size: 13px; display: grid; gap: 4px; }
 @media (max-width: 760px) {
   .ladder { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .ladder .rung:last-child { grid-column: 1 / -1; }
+  .settings { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .settings .main { grid-column: 1 / -1; }
   th, td { padding: 8px 12px; }
   .tier-head { padding: 12px; }
 }
@@ -154,12 +164,32 @@ footer { color: var(--muted); font-size: 13px; display: grid; gap: 4px; }
         <button id="tab-arme" role="tab" aria-selected="true" data-sheet="arme">Arme</button>
         <button id="tab-guard" role="tab" aria-selected="false" data-sheet="guard">Guard</button>
       </div>
-      <label class="field" for="procRate">Taux de proc
-        <input id="procRate" class="in" type="text" inputmode="decimal" value="25"> %
-      </label>
       <button class="btn" id="reset" type="button">Revenir aux valeurs du fichier</button>
     </div>
   </header>
+
+  <section class="settings" aria-label="Taux de réussite">
+    <label class="rate main" for="successRate">
+      <span class="lbl">Taux de réussite du craft</span>
+      <span class="row"><input id="successRate" class="in" type="text" inputmode="decimal"> %</span>
+      <span class="small">Dépend de ton niveau de métier</span>
+    </label>
+    <label class="rate" for="procRate">
+      <span class="lbl">Chance de proc</span>
+      <span class="row"><input id="procRate" class="in" type="text" inputmode="decimal"> %</span>
+      <span class="small">Obtenir la version Splendent</span>
+    </label>
+    <label class="rate" for="comboRate">
+      <span class="lbl">Réussite du combo</span>
+      <span class="row"><input id="comboRate" class="in" type="text" inputmode="decimal"> %</span>
+      <span class="small">Après le proc</span>
+    </label>
+    <div class="rate">
+      <span class="lbl">Multiplicateurs</span>
+      <span class="row num">craft ×<span id="multCraft"></span></span>
+      <span class="row num">proc ×<span id="multProc"></span></span>
+    </div>
+  </section>
 
   <p class="notice" id="guardNotice" hidden>Les prix du guard sont pour l'instant ceux de l'arme. Les quantités suivent les recettes du guard, identiques à celles de l'arme.</p>
 
@@ -167,7 +197,7 @@ footer { color: var(--muted); font-size: 13px; display: grid; gap: 4px; }
   <section class="tiers" id="tiers"></section>
 
   <footer>
-    <span>Coût moyen proc = coût d'un craft ÷ taux de proc (25 % donne ×4, comme dans le fichier Excel).</span>
+    <span>Coût total craft = matériaux ÷ taux de réussite. Coût moyen proc = matériaux ÷ (réussite × proc × combo). Un craft raté consomme tous les matériaux.</span>
     <span>Valeurs de départ reprises de « craft arme.xlsx ». Tes modifications restent dans ce navigateur.</span>
   </footer>
 </div>
@@ -193,7 +223,7 @@ footer { color: var(--muted); font-size: 13px; display: grid; gap: 4px; }
   var KEY = "forge-aion2-v1";
 
   function defaults() {
-    var s = { proc: 25, sheets: {} };
+    var s = { success: 94.639789, proc: 25, combo: 97.397412, sheets: {} };
     Object.keys(SHEETS).forEach(function (k) {
       s.sheets[k] = TIERS.map(function (t) { return t.rows.map(function (r) { return [r[1], r[2]]; }); });
     });
@@ -204,6 +234,7 @@ footer { color: var(--muted); font-size: 13px; display: grid; gap: 4px; }
     var saved = JSON.parse(localStorage.getItem(KEY) || "null");
     if (saved && saved.sheets && saved.sheets.arme && saved.sheets.guard) state = saved;
   } catch (e) {}
+  ["success", "proc", "combo"].forEach(function (k) { if (typeof state[k] !== "number") state[k] = defaults()[k]; });
   function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
 
   var current = location.hash === "#guard" ? "guard" : "arme";
@@ -214,12 +245,18 @@ footer { color: var(--muted); font-size: 13px; display: grid; gap: 4px; }
     return d === "" ? null : Number(d);
   }
   function label(s) { return s.replace("{X}", SHEETS[current].X).replace("{x}", SHEETS[current].x); }
-  function factor() { var p = state.proc; return p > 0 ? 100 / p : NaN; }
+  function craftFactor() { var s = state.success; return s > 0 ? 100 / s : NaN; }
+  function factor() {
+    var s = state.success, p = state.proc, c = state.combo;
+    return s > 0 && p > 0 && c > 0 ? 1e6 / (s * p * c) : NaN;
+  }
+  var fmt2 = new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  function rate(v) { return v == null || isNaN(v) ? "" : String(v).replace(".", ","); }
 
   function totals() {
     return state.sheets[current].map(function (rows) {
       var sum = rows.reduce(function (a, r) { return a + (r[0] || 0) * (r[1] || 0); }, 0);
-      return { craft: sum, avg: sum * factor() };
+      return { raw: sum, craft: sum * craftFactor(), avg: sum * factor() };
     });
   }
 
@@ -249,7 +286,8 @@ footer { color: var(--muted); font-size: 13px; display: grid; gap: 4px; }
         '<span class="proc">Coût moyen proc <b class="num" data-avg="' + t.id + '"></b></span></div>' +
         '<div class="scroll"><table><thead><tr><th>Matériau</th><th class="r">Quantité</th><th class="r">Valeur unitaire</th><th class="r">Coût total</th></tr></thead>' +
         '<tbody>' + rows +
-        '<tr class="total"><td colspan="3">Coût total craft</td><td class="r num" data-craft="' + t.id + '"></td></tr>' +
+        '<tr class="raw"><td colspan="3">Coût des matériaux</td><td class="r num" data-raw="' + t.id + '"></td></tr>' +
+        '<tr class="total"><td colspan="3">Coût total craft (échecs compris)</td><td class="r num" data-craft="' + t.id + '"></td></tr>' +
         '<tr class="avg"><td colspan="3">Coût moyen proc</td><td class="r num" data-avg="' + t.id + '"></td></tr>' +
         '</tbody></table></div></article>';
     }).join("");
@@ -258,7 +296,10 @@ footer { color: var(--muted); font-size: 13px; display: grid; gap: 4px; }
       b.setAttribute("aria-selected", String(b.dataset.sheet === current));
     });
     document.getElementById("guardNotice").hidden = current !== "guard";
-    document.getElementById("procRate").value = String(state.proc).replace(".", ",");
+    [["successRate", "success"], ["procRate", "proc"], ["comboRate", "combo"]].forEach(function (p) {
+      var el = document.getElementById(p[0]);
+      if (document.activeElement !== el) el.value = rate(state[p[1]]);
+    });
     update();
   }
 
@@ -273,8 +314,12 @@ footer { color: var(--muted); font-size: 13px; display: grid; gap: 4px; }
     });
     TIERS.forEach(function (t, ti) {
       document.querySelectorAll('[data-craft="' + t.id + '"]').forEach(function (el) { el.textContent = show(tot[ti].craft); });
+      document.querySelectorAll('[data-raw="' + t.id + '"]').forEach(function (el) { el.textContent = show(tot[ti].raw); });
       document.querySelectorAll('[data-avg="' + t.id + '"]').forEach(function (el) { el.textContent = show(tot[ti].avg); });
     });
+    var mc = craftFactor(), mp = factor();
+    document.getElementById("multCraft").textContent = isNaN(mc) ? "—" : fmt2.format(mc);
+    document.getElementById("multProc").textContent = isNaN(mp) ? "—" : fmt2.format(mp);
   }
 
   tiers.addEventListener("input", function (e) {
@@ -300,10 +345,12 @@ footer { color: var(--muted); font-size: 13px; display: grid; gap: 4px; }
     save(); update();
   });
 
-  document.getElementById("procRate").addEventListener("input", function (e) {
-    var v = parse(e.target.value);
-    state.proc = v == null ? NaN : v;
-    save(); update();
+  [["successRate", "success"], ["procRate", "proc"], ["comboRate", "combo"]].forEach(function (p) {
+    document.getElementById(p[0]).addEventListener("input", function (e) {
+      var v = parse(e.target.value);
+      state[p[1]] = v == null ? NaN : v;
+      save(); update();
+    });
   });
 
   document.querySelectorAll(".tabs button").forEach(function (b) {
