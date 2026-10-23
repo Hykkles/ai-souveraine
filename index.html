@@ -19,7 +19,10 @@
   --line: #d5d8e4;
   --accent: #9a5a1f;
   --accent-soft: #f4e6d6;
+  --armor: #3f6489;
+  --craft: #86398b;
   --alch: #0e7a74;
+  --prix: #5b5f76;
   --g-blanc: #7b8091;
   --g-vert: #23864a;
   --g-bleu: #2a62c4;
@@ -32,14 +35,16 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #13141c; --surface: #1c1e29; --surface-2: #232633; --ink: #ebe7df; --muted: #9b9eb3;
-    --line: #2f3242; --accent: #dc9d55; --accent-soft: #3a2a1a; --alch: #4fcfc3;
+    --line: #2f3242; --accent: #dc9d55; --accent-soft: #3a2a1a;
+    --armor: #8fb6dd; --craft: #d792dc; --alch: #4fcfc3; --prix: #b9bccd;
     --g-blanc: #c5c9d4; --g-vert: #5ccf88; --g-bleu: #6ea6ff; --g-gold: #efc24a; --g-roi: #ff8752;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #13141c; --surface: #1c1e29; --surface-2: #232633; --ink: #ebe7df; --muted: #9b9eb3;
-  --line: #2f3242; --accent: #dc9d55; --accent-soft: #3a2a1a; --alch: #4fcfc3;
+  --line: #2f3242; --accent: #dc9d55; --accent-soft: #3a2a1a;
+  --armor: #8fb6dd; --craft: #d792dc; --alch: #4fcfc3; --prix: #b9bccd;
   --g-blanc: #c5c9d4; --g-vert: #5ccf88; --g-bleu: #6ea6ff; --g-gold: #efc24a; --g-roi: #ff8752;
   color-scheme: dark;
 }
@@ -56,7 +61,9 @@ body {
   padding-right: max(16px, env(safe-area-inset-right, 0px));
   display: grid; gap: 24px;
 }
+.wrap > * { min-width: 0; }
 .panel { display: grid; gap: 24px; }
+.panel > * { min-width: 0; }
 .num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
 
 header { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 16px; }
@@ -64,21 +71,24 @@ h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(28px, 
 h1 span { color: var(--accent); }
 .sub { margin: 6px 0 0; color: var(--muted); max-width: 60ch; }
 
-.jobs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); }
+.jobs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); overflow-x: auto; }
 .jobs button {
-  font: 400 19px var(--font-display); color: var(--muted); background: none; border: 0;
-  border-bottom: 3px solid transparent; margin-bottom: -1px; padding: 8px 16px; cursor: pointer;
+  font: 400 19px var(--font-display); color: var(--muted); background: none; border: 0; white-space: nowrap;
+  border-bottom: 3px solid transparent; margin-bottom: -1px; padding: 8px 14px; cursor: pointer;
 }
 .jobs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--job); }
 .jobs button:hover { color: var(--ink); }
 
-.controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
-.tabs { display: inline-flex; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 3px; }
+.tabs {
+  display: flex; flex-wrap: wrap; gap: 2px; width: fit-content; max-width: 100%;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 3px;
+}
 .tabs button {
   font: 500 14px var(--font-body); color: var(--muted); background: transparent; border: 0;
-  padding: 7px 18px; border-radius: 7px; cursor: pointer;
+  padding: 7px 16px; border-radius: 7px; cursor: pointer;
 }
-.tabs button[aria-selected="true"] { background: var(--accent); color: var(--surface); }
+.tabs button:hover { color: var(--ink); }
+.tabs button[aria-selected="true"] { background: var(--jobc, var(--accent)); color: var(--surface); }
 .btn {
   font: 500 13px var(--font-body); color: var(--ink); background: var(--surface);
   border: 1px solid var(--line); border-radius: 8px; padding: 7px 12px; cursor: pointer;
@@ -88,7 +98,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 
 .settings { display: grid; grid-template-columns: 1.3fr repeat(3, minmax(0, 1fr)); gap: 10px; }
 .rate { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: grid; gap: 6px; align-content: start; }
-.rate.main { border-color: var(--accent); background: var(--accent-soft); }
+.rate.main { border-color: var(--jobc, var(--accent)); background: var(--accent-soft); }
 .rate .lbl { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
 .rate .row { display: flex; align-items: center; gap: 8px; color: var(--muted); }
 .rate .row.num { color: var(--ink); }
@@ -102,12 +112,12 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 .ladder { display: grid; grid-template-columns: repeat(var(--cols, 5), minmax(0, 1fr)); gap: 10px; }
 .rung {
   background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--grade);
-  border-radius: 10px; padding: 12px 14px; display: grid; gap: 4px; text-decoration: none; color: inherit;
+  border-radius: 10px; padding: 12px 14px; display: grid; gap: 4px; text-decoration: none; color: inherit; min-width: 0;
 }
 .rung:hover { border-color: var(--grade); }
 .rung .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
 .rung .name { font-family: var(--font-display); font-size: 17px; color: var(--grade); }
-.rung .big { font-size: 17px; font-weight: 500; }
+.rung .big { font-size: 17px; font-weight: 500; overflow-wrap: anywhere; }
 .rung .small { font-size: 13px; color: var(--muted); }
 
 /* Fiches */
@@ -122,6 +132,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
   font: 600 11px var(--font-body); letter-spacing: .08em; text-transform: uppercase;
   color: var(--grade); border: 1px solid var(--grade); border-radius: 999px; padding: 2px 9px;
 }
+.chip.plain { color: var(--muted); border-color: var(--line); }
 .tier-head .proc { color: var(--muted); font-size: 13px; }
 .tier-head .proc b { color: var(--ink); font-weight: 500; }
 .tier-head label.proc { display: inline-flex; align-items: center; gap: 8px; }
@@ -143,15 +154,18 @@ input.in {
   padding: 5px 8px; text-align: right; width: 100%;
 }
 input.in:hover { border-color: var(--muted); }
+input.search { text-align: left; font-family: var(--font-body); max-width: 320px; padding: 8px 10px; }
 td.qty { width: 110px; }
 td.price { width: 190px; }
 td.cost { width: 170px; }
 tr.raw td { color: var(--muted); }
 tr.total td { font-weight: 600; background: var(--surface-2); }
 tr.avg td { font-weight: 600; color: var(--accent); }
-.missing { font-size: 12px; color: var(--g-roi); }
 tr.gain td { font-weight: 600; }
 tr.split td { border-top: 2px solid var(--line); }
+tr.group td { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); background: var(--surface-2); }
+.missing { font-size: 12px; color: var(--g-roi); }
+.used { display: block; font-size: 12px; color: var(--muted); }
 [data-sign="pos"] { color: var(--g-vert); }
 [data-sign="neg"] { color: var(--g-roi); }
 
@@ -175,29 +189,27 @@ footer { color: var(--muted); font-size: 13px; display: grid; gap: 4px; }
   <header>
     <div>
       <h1>Forge <span>Aion 2</span></h1>
-      <p class="sub">Coût de craft par métier. Modifie une quantité, un prix ou un taux et tout se recalcule.</p>
+      <p class="sub">Coût de craft par métier. Modifie une quantité, un prix ou un taux et tout se recalcule. Le prix d'un matériau s'applique dans tous les onglets.</p>
     </div>
     <button class="btn" id="reset" type="button">Revenir aux valeurs de départ</button>
   </header>
 
   <nav class="jobs" role="tablist" aria-label="Métier">
-    <button id="job-forge" role="tab" aria-selected="true" data-job="forge" style="--job: var(--accent)">Forgeron</button>
-    <button id="job-alch" role="tab" aria-selected="false" data-job="alch" style="--job: var(--alch)">Alchimie</button>
+    <button id="job-forge" role="tab" data-job="forge" style="--job: var(--accent)">Forgeron</button>
+    <button id="job-armor" role="tab" data-job="armor" style="--job: var(--armor)">Armure</button>
+    <button id="job-craft" role="tab" data-job="craft" style="--job: var(--craft)">Artisanat</button>
+    <button id="job-alch" role="tab" data-job="alch" style="--job: var(--alch)">Alchimie</button>
+    <button id="job-prix" role="tab" data-job="prix" style="--job: var(--prix)">Prix des matériaux</button>
   </nav>
 
-  <section class="panel" id="panel-forge">
-    <div class="controls">
-      <div class="tabs" role="tablist" aria-label="Équipement">
-        <button id="tab-arme" role="tab" aria-selected="true" data-sheet="arme">Arme</button>
-        <button id="tab-guard" role="tab" aria-selected="false" data-sheet="guard">Guard</button>
-      </div>
-    </div>
+  <section class="panel" id="panel-gear">
+    <div class="tabs" id="sheetTabs" role="tablist" aria-label="Pièce"></div>
 
     <section class="settings" aria-label="Taux de réussite">
       <label class="rate main" for="successRate">
         <span class="lbl">Taux de réussite du craft</span>
         <span class="row"><input id="successRate" class="in" type="text" inputmode="decimal"> %</span>
-        <span class="small">Dépend de ton niveau de métier</span>
+        <span class="small" id="successHint">Dépend de ton niveau de métier</span>
       </label>
       <label class="rate" for="procRate">
         <span class="lbl">Chance de proc</span>
@@ -216,19 +228,19 @@ footer { color: var(--muted); font-size: 13px; display: grid; gap: 4px; }
       </div>
     </section>
 
-    <p class="notice" id="guardNotice" hidden>Les prix du guard sont pour l'instant ceux de l'arme. Les quantités suivent les recettes du guard, identiques à celles de l'arme.</p>
+    <p class="notice" id="gearNotice"></p>
 
-    <nav class="ladder odd" id="ladder" aria-label="Résumé par palier"></nav>
+    <nav class="ladder" id="ladder" aria-label="Résumé par palier"></nav>
     <section class="tiers" id="tiers"></section>
 
     <footer>
       <span>Coût total craft = matériaux ÷ taux de réussite. Coût moyen proc = matériaux ÷ (réussite × proc × combo). Un craft raté consomme tous les matériaux.</span>
-      <span>Valeurs de départ reprises de « craft arme.xlsx ».</span>
+      <span id="gearSource"></span>
     </footer>
   </section>
 
   <section class="panel" id="panel-alch" hidden>
-    <p class="notice">Recettes côté Asmodien (papier d'Asvata). Remplis le prix des matériaux et le prix de vente du parchemin pour voir ton gain. Le taux de réussite se règle sur chaque parchemin : 72,9 % au niveau de maîtrise requis, plus quand ton niveau le dépasse.</p>
+    <p class="notice">Recettes côté Asmodien (papier d'Asvata). Remplis le prix des matériaux et le prix de vente du parchemin pour voir ton gain. Un prix vide compte pour 0, par exemple pour un matériau que tu récoltes ou craftes toi-même. Le taux de réussite se règle sur chaque parchemin : 72,9 % au niveau de maîtrise requis, plus quand ton niveau le dépasse.</p>
 
     <nav class="ladder" id="alchLadder" aria-label="Résumé par parchemin" style="--cols: 4"></nav>
     <section class="tiers" id="alchTiers"></section>
@@ -240,73 +252,102 @@ footer { color: var(--muted); font-size: 13px; display: grid; gap: 4px; }
       <span>Recettes trouvées sur metabot.gg et dbaion2.ru, taux sur aion2data.com. À vérifier en jeu.</span>
     </footer>
   </section>
+
+  <section class="panel" id="panel-prix" hidden>
+    <p class="notice">Tous les prix au même endroit. Un prix saisi ici, ou dans n'importe quelle fiche, s'applique à toutes les recettes qui utilisent ce matériau. Laisse vide ou mets 0 pour ce que tu récoltes ou craftes toi-même.</p>
+    <label for="priceFilter" class="rate" style="max-width: 360px">
+      <span class="lbl">Chercher un matériau</span>
+      <input id="priceFilter" class="in search" type="search" placeholder="od, pierre, cuir…">
+    </label>
+    <section class="tier">
+      <div class="scroll"><table><thead><tr><th>Matériau</th><th class="r">Prix unitaire</th></tr></thead>
+        <tbody id="priceRows"></tbody></table></div>
+    </section>
+  </section>
 </div>
 
 <script>
 (function () {
-  var FORGE = [
-    { id: "blanc", title: "Craft blanc", grade: "Blanc", color: "--g-blanc",
-      rows: [["Lingot", 3, 2750], ["Pierre de raffinage", 5, 799], ["Od", 2, 5200]] },
-    { id: "vert", title: "Craft vert", grade: "Vert", color: "--g-vert",
-      rows: [["{X} proc", 1, 89000, "blanc"], ["Pierre de raffinage", 5, 70000], ["Minerai orichalque", 6, 1200], ["Od", 3, 2100]] },
-    { id: "bleu", title: "Craft bleu", grade: "Bleu", color: "--g-bleu",
-      rows: [["{X} proc", 1, 1800000, "vert"], ["Pierre de raffinage", 5, 449000], ["Minerai orichalque", 8, 66000], ["Od", 4, 65000]] },
-    { id: "gold", title: "Craft gold", grade: "Gold", color: "--g-gold",
-      rows: [["{X} proc", 1, 20700000, "bleu"], ["Pierre de raffinage", 4, 170000], ["Corne épaisse de balaur", 22, 39000],
-             ["Intention de rage", 10, 2800000], ["Minerai orichalque", 9, 560000], ["Od", 5, 570000]] },
-    { id: "roi", title: "{X} du roi dragon noir", grade: "Roi dragon", color: "--g-roi",
-      rows: [["{x} roi dragon étoilé", 1, null], ["Craft gold", 1, 20700000, "bleu"], ["Pierre de raffinage", 5, 170000],
-             ["Corne dure de balaur", 29, 75000], ["Intention de rage", 3, 2800000], ["Volonté de rage", 15, 680000],
-             ["Minerai orichalque", 12, 560000], ["Od", 7, 570000]] }
-  ];
-  var SHEETS = { arme: { X: "Arme", x: "arme" }, guard: { X: "Guard", x: "guard" } };
-
-  var ALCH = [
-    { id: "courage", short: "Courage", title: "Parchemin de courage supérieur", lvl: 70, best: 90.9,
-      rows: [["Parchemin de courage (lié)", 1], ["Poudre de saphir", 3], ["Papier d'Asvata", 1], ["Encre professionnelle (liée)", 1]] },
-    { id: "course", short: "Course", title: "Parchemin de course supérieur", lvl: 65, best: 90.9,
-      rows: [["Parchemin de course (lié)", 1], ["Poudre de rubis", 3], ["Papier d'Asvata", 1], ["Encre professionnelle (liée)", 1]] },
-    { id: "protection", short: "Protection", title: "Parchemin de protection supérieur", lvl: 75, best: 88.1,
-      note: "Recette trouvée sous le nom anglais « Superior Benediction Scroll » (PV max +15 %, PM max +200 pendant 5 min). Vérifie que c'est bien ton parchemin de protection.",
-      rows: [["Parchemin de protection (lié)", 1], ["Poudre de diamant", 3], ["Papier d'Asvata", 1], ["Encre professionnelle (liée)", 1]] },
-    { id: "resist", short: "Résistance", title: "Parchemin de résistance aux altérations d'état supérieur", lvl: 95, best: 85.2,
-      note: "Je n'ai trouvé que la recette du parchemin de résistance aux altérations d'état, sans version « supérieure ». C'est elle qui est affichée.",
-      rows: [["Poudre de diamant", 3], ["Poudre de pierre spirituelle", 5], ["Papier d'Asvata", 1], ["Encre exceptionnelle (liée)", 1]] }
-  ];
+  var DATA = {"mat": {"Splendent Ruby Necklace": "Collier proc blanc", "Ruby Powder": "Poudre de rubis", "Tanned Thick Balaur Leather": "Cuir épais de balaur tanné", "Splendent Orichalcum Greaves": "Jambières proc blanc", "Splendent Diamond Earrings": "Boucles d'oreilles proc blanc", "Expert's Splendent Orichalcum Boots": "Bottes proc vert", "Artisan's Splendent Orichalcum Boots": "Bottes proc bleu", "Expert's Splendent Sapphire Ring": "Anneau proc vert", "Benediction Scroll (Bound)": "Parchemin de protection (lié)", "Artisan's Splendent Orichalcum Greaves": "Jambières proc bleu", "Artisan's Splendent Orichalcum Guard": "Guard proc bleu", "Artisan's Splendent Ruby Necklace": "Collier proc bleu", "Magic Crystal": "Cristal magique", "Strong Leather": "Cuir résistant", "Splendent Orichalcum Breastplate": "Plastron proc blanc", "Radiant Diamond Gemstone": "Gemme de diamant radieuse", "Wrathful Will": "Volonté de rage", "Expert's Splendent Orichalcum Pauldrons": "Épaulières proc vert", "Odyle": "Od", "Pure Ruby Gemstone": "Gemme de rubis pure", "Splendent Orichalcum Helm": "Casque proc blanc", "Diamond Powder": "Poudre de diamant", "Expert's Splendent Orichalcum Helm": "Casque proc vert", "Fine Orichalcum Ore": "Minerai d'orichalque fin", "Artisan's Splendent Orichalcum Helm": "Casque proc bleu", "Artisan's Splendent Orichalcum Pauldrons": "Épaulières proc bleu", "Spiritstone Powder": "Poudre de pierre spirituelle", "Artisan's Splendent Sapphire Ring": "Anneau proc bleu", "Fine Thick Balaur Horn": "Corne épaisse de balaur", "Professional Ink (Bound)": "Encre professionnelle (liée)", "Artisan's Refining Stone": "Pierre de raffinage d'artisan", "Enhanced Hard Balaur Scale": "Écaille dure de balaur renforcée", "Sapphire Powder": "Poudre de saphir", "Orichalcum Ingot": "Lingot d'orichalque", "Artisan's Splendent Orichalcum Gloves": "Gants proc bleu", "Asvata Paper": "Papier d'Asvata", "Exceptional Ink (Bound)": "Encre exceptionnelle (liée)", "Fine Diamond Gemstone": "Gemme de diamant fine", "Speed Scroll (Bound)": "Parchemin de course (lié)", "Expert's Splendent Orichalcum Breastplate": "Plastron proc vert", "Expert's Splendent Diamond Earrings": "Boucles d'oreilles proc vert", "Wrathful Mind": "Intention de rage", "arme:p-vert": "Arme proc vert", "Expert's Splendent Orichalcum Guard": "Guard proc vert", "Fine Ruby Gemstone": "Gemme de rubis fine", "Artisan's Ultimate Refining Stone": "Pierre de raffinage ultime", "Pure Sapphire Gemstone": "Gemme de saphir pure", "Expert's Splendent Orichalcum Cloak": "Cape proc vert", "arme:p-blanc": "Arme proc blanc", "arme:p-bleu": "Arme proc bleu", "Diamond Decoration": "Ornement de diamant", "Splendent Orichalcum Cloak": "Cape proc blanc", "Expert's Splendent Ruby Necklace": "Collier proc vert", "Expert's Refining Stone": "Pierre de raffinage d'expert", "Artisan's Splendent Orichalcum Cloak": "Cape proc bleu", "Enhanced Thick Balaur Scale": "Écaille épaisse de balaur renforcée", "Splendent Orichalcum Pauldrons": "Épaulières proc blanc", "Tanned Hard Balaur Leather": "Cuir dur de balaur tanné", "guard:star": "Guard roi dragon étoilé", "Expert's Splendent Orichalcum Gloves": "Gants proc vert", "Artisan's Splendent Diamond Earrings": "Boucles d'oreilles proc bleu", "Splendent Orichalcum Gloves": "Gants proc blanc", "Splendent Orichalcum Boots": "Bottes proc blanc", "Radiant Ruby Gemstone": "Gemme de rubis radieuse", "Fine Hard Balaur Horn": "Corne dure de balaur", "Pure Odyle": "Od pur", "Splendent Orichalcum Guard": "Guard proc blanc", "Radiant Orichalcum Ore": "Minerai d'orichalque radieux", "arme:star": "Arme roi dragon étoilé", "Artisan's Splendent Orichalcum Breastplate": "Plastron proc bleu", "Sapphire Decoration": "Ornement de saphir", "Chaser Bracelet": "Bracelet du poursuivant", "Ruby Decoration": "Ornement de rubis", "Splendent Sapphire Ring": "Anneau proc blanc", "Expert's Splendent Orichalcum Greaves": "Jambières proc vert", "Radiant Odyle": "Od radieux", "Old Mercenary Commander Bracelet": "Bracelet du vieux commandant mercenaire", "Fine Sapphire Gemstone": "Gemme de saphir fine", "Fine Odyle": "Od fin", "Pure Orichalcum Ore": "Minerai d'orichalque pur", "Refining Stone": "Pierre de raffinage", "Pure Diamond Gemstone": "Gemme de diamant pure", "Radiant Sapphire Gemstone": "Gemme de saphir radieuse", "Courage Scroll (Bound)": "Parchemin de courage (lié)"}, "price": {"Orichalcum Ingot": 2750, "Refining Stone": 799, "Odyle": 5200, "Expert's Refining Stone": 70000, "Fine Orichalcum Ore": 1200, "Fine Odyle": 2100, "Artisan's Refining Stone": 449000, "Pure Orichalcum Ore": 66000, "Pure Odyle": 65000, "Artisan's Ultimate Refining Stone": 170000, "Fine Thick Balaur Horn": 39000, "Wrathful Mind": 2800000, "Radiant Orichalcum Ore": 560000, "Radiant Odyle": 570000, "Fine Hard Balaur Horn": 75000, "Wrathful Will": 680000, "arme:p-blanc": 89000, "arme:p-vert": 1800000, "arme:p-bleu": 20700000, "Splendent Orichalcum Guard": 89000, "Expert's Splendent Orichalcum Guard": 1800000, "Artisan's Splendent Orichalcum Guard": 20700000}, "groups": {"items": ["Artisan's Splendent Diamond Earrings", "Artisan's Splendent Orichalcum Boots", "Artisan's Splendent Orichalcum Breastplate", "Artisan's Splendent Orichalcum Cloak", "Artisan's Splendent Orichalcum Gloves", "Artisan's Splendent Orichalcum Greaves", "Artisan's Splendent Orichalcum Guard", "Artisan's Splendent Orichalcum Helm", "Artisan's Splendent Orichalcum Pauldrons", "Artisan's Splendent Ruby Necklace", "Artisan's Splendent Sapphire Ring", "Chaser Bracelet", "Expert's Splendent Diamond Earrings", "Expert's Splendent Orichalcum Boots", "Expert's Splendent Orichalcum Breastplate", "Expert's Splendent Orichalcum Cloak", "Expert's Splendent Orichalcum Gloves", "Expert's Splendent Orichalcum Greaves", "Expert's Splendent Orichalcum Guard", "Expert's Splendent Orichalcum Helm", "Expert's Splendent Orichalcum Pauldrons", "Expert's Splendent Ruby Necklace", "Expert's Splendent Sapphire Ring", "Old Mercenary Commander Bracelet", "Splendent Diamond Earrings", "Splendent Orichalcum Boots", "Splendent Orichalcum Breastplate", "Splendent Orichalcum Cloak", "Splendent Orichalcum Gloves", "Splendent Orichalcum Greaves", "Splendent Orichalcum Guard", "Splendent Orichalcum Helm", "Splendent Orichalcum Pauldrons", "Splendent Ruby Necklace", "Splendent Sapphire Ring", "arme:p-blanc", "arme:p-bleu", "arme:p-vert", "arme:star", "guard:star"], "mats": ["Artisan's Refining Stone", "Artisan's Ultimate Refining Stone", "Asvata Paper", "Benediction Scroll (Bound)", "Courage Scroll (Bound)", "Diamond Decoration", "Diamond Powder", "Enhanced Hard Balaur Scale", "Enhanced Thick Balaur Scale", "Exceptional Ink (Bound)", "Expert's Refining Stone", "Fine Diamond Gemstone", "Fine Hard Balaur Horn", "Fine Odyle", "Fine Orichalcum Ore", "Fine Ruby Gemstone", "Fine Sapphire Gemstone", "Fine Thick Balaur Horn", "Magic Crystal", "Odyle", "Orichalcum Ingot", "Professional Ink (Bound)", "Pure Diamond Gemstone", "Pure Odyle", "Pure Orichalcum Ore", "Pure Ruby Gemstone", "Pure Sapphire Gemstone", "Radiant Diamond Gemstone", "Radiant Odyle", "Radiant Orichalcum Ore", "Radiant Ruby Gemstone", "Radiant Sapphire Gemstone", "Refining Stone", "Ruby Decoration", "Ruby Powder", "Sapphire Decoration", "Sapphire Powder", "Speed Scroll (Bound)", "Spiritstone Powder", "Strong Leather", "Tanned Hard Balaur Leather", "Tanned Thick Balaur Leather", "Wrathful Mind", "Wrathful Will"]}, "jobs": {"forge": {"label": "Forgeron", "trade": "forge", "sheets": [{"id": "arme", "label": "Arme", "tiers": [{"id": "blanc", "title": "Craft blanc", "grade": "Blanc", "color": "--g-blanc", "lvl": null, "rows": [["Orichalcum Ingot", 3], ["Refining Stone", 5], ["Odyle", 2]]}, {"id": "vert", "title": "Craft vert", "grade": "Vert", "color": "--g-vert", "lvl": null, "rows": [["arme:p-blanc", 1, "blanc"], ["Expert's Refining Stone", 5], ["Fine Orichalcum Ore", 6], ["Fine Odyle", 3]]}, {"id": "bleu", "title": "Craft bleu", "grade": "Bleu", "color": "--g-bleu", "lvl": null, "rows": [["arme:p-vert", 1, "vert"], ["Artisan's Refining Stone", 5], ["Pure Orichalcum Ore", 8], ["Pure Odyle", 4]]}, {"id": "gold", "title": "Craft gold", "grade": "Gold", "color": "--g-gold", "lvl": null, "rows": [["arme:p-bleu", 1, "bleu"], ["Artisan's Ultimate Refining Stone", 4], ["Fine Thick Balaur Horn", 22], ["Wrathful Mind", 10], ["Radiant Orichalcum Ore", 9], ["Radiant Odyle", 5]]}, {"id": "roi", "title": "Arme du roi dragon noir", "grade": "Roi dragon", "color": "--g-roi", "lvl": null, "rows": [["arme:star", 1], ["arme:p-bleu", 1, "bleu"], ["Artisan's Ultimate Refining Stone", 5], ["Fine Hard Balaur Horn", 29], ["Wrathful Mind", 3], ["Wrathful Will", 15], ["Radiant Orichalcum Ore", 12], ["Radiant Odyle", 7]]}]}, {"id": "guard", "label": "Guard", "tiers": [{"id": "blanc", "title": "Craft blanc", "grade": "Blanc", "color": "--g-blanc", "lvl": "5", "rows": [["Orichalcum Ingot", 3], ["Refining Stone", 5], ["Odyle", 2]]}, {"id": "vert", "title": "Craft vert", "grade": "Vert", "color": "--g-vert", "lvl": "20", "rows": [["Splendent Orichalcum Guard", 1, "blanc"], ["Expert's Refining Stone", 5], ["Fine Orichalcum Ore", 6], ["Fine Odyle", 3]]}, {"id": "bleu", "title": "Craft bleu", "grade": "Bleu", "color": "--g-bleu", "lvl": "35", "rows": [["Expert's Splendent Orichalcum Guard", 1, "vert"], ["Artisan's Refining Stone", 5], ["Pure Orichalcum Ore", 8], ["Pure Odyle", 4]]}, {"id": "gold", "title": "Craft gold", "grade": "Gold", "color": "--g-gold", "lvl": "60", "rows": [["Artisan's Splendent Orichalcum Guard", 1, "bleu"], ["Artisan's Ultimate Refining Stone", 4], ["Fine Thick Balaur Horn", 22], ["Wrathful Mind", 10], ["Radiant Orichalcum Ore", 9], ["Radiant Odyle", 5]]}, {"id": "roi", "title": "Guard du roi dragon noir", "grade": "Roi dragon", "color": "--g-roi", "lvl": null, "rows": [["guard:star", 1], ["Artisan's Splendent Orichalcum Guard", 1, "bleu"], ["Artisan's Ultimate Refining Stone", 5], ["Fine Hard Balaur Horn", 29], ["Wrathful Mind", 3], ["Wrathful Will", 15], ["Radiant Orichalcum Ore", 12], ["Radiant Odyle", 7]]}], "notice": "Les prix du guard sont au départ ceux de l'arme. Les quantités suivent les recettes du guard, identiques à celles de l'arme."}], "source": "Valeurs de départ reprises de « craft arme.xlsx »."}, "armor": {"label": "Armure", "trade": "armurerie", "sheets": [{"id": "plastron", "label": "Plastron", "tiers": [{"id": "blanc", "title": "Craft blanc", "grade": "Blanc", "color": "--g-blanc", "lvl": "3", "rows": [["Orichalcum Ingot", 2], ["Strong Leather", 4], ["Refining Stone", 3], ["Odyle", 1]]}, {"id": "vert", "title": "Craft vert", "grade": "Vert", "color": "--g-vert", "lvl": "15", "rows": [["Splendent Orichalcum Breastplate", 1, "blanc"], ["Expert's Refining Stone", 3], ["Fine Orichalcum Ore", 4], ["Fine Odyle", 2]]}, {"id": "bleu", "title": "Craft bleu", "grade": "Bleu", "color": "--g-bleu", "lvl": "30", "rows": [["Expert's Splendent Orichalcum Breastplate", 1, "vert"], ["Artisan's Refining Stone", 3], ["Pure Orichalcum Ore", 5], ["Pure Odyle", 3]]}, {"id": "gold", "title": "Craft gold", "grade": "Gold", "color": "--g-gold", "lvl": "55", "rows": [["Artisan's Splendent Orichalcum Breastplate", 1, "bleu"], ["Artisan's Ultimate Refining Stone", 3], ["Tanned Thick Balaur Leather", 15], ["Wrathful Mind", 7], ["Radiant Orichalcum Ore", 6], ["Radiant Odyle", 3]]}, {"id": "roi", "title": "Plastron du roi dragon noir", "grade": "Roi dragon", "color": "--g-roi", "lvl": null, "rows": [["Artisan's Splendent Orichalcum Breastplate", 1, "bleu"], ["Artisan's Ultimate Refining Stone", 3], ["Tanned Hard Balaur Leather", 19], ["Wrathful Mind", 2], ["Wrathful Will", 10], ["Radiant Orichalcum Ore", 8], ["Radiant Odyle", 5]]}]}, {"id": "jambieres", "label": "Jambières", "tiers": [{"id": "blanc", "title": "Craft blanc", "grade": "Blanc", "color": "--g-blanc", "lvl": "3", "rows": [["Orichalcum Ingot", 2], ["Strong Leather", 3], ["Refining Stone", 2], ["Odyle", 1]]}, {"id": "vert", "title": "Craft vert", "grade": "Vert", "color": "--g-vert", "lvl": "15", "rows": [["Splendent Orichalcum Greaves", 1, "blanc"], ["Expert's Refining Stone", 2], ["Fine Orichalcum Ore", 3], ["Fine Odyle", 2]]}, {"id": "bleu", "title": "Craft bleu", "grade": "Bleu", "color": "--g-bleu", "lvl": "30", "rows": [["Expert's Splendent Orichalcum Greaves", 1, "vert"], ["Artisan's Refining Stone", 2], ["Pure Orichalcum Ore", 4], ["Pure Odyle", 2]]}, {"id": "gold", "title": "Craft gold", "grade": "Gold", "color": "--g-gold", "lvl": "55", "rows": [["Artisan's Splendent Orichalcum Greaves", 1, "bleu"], ["Artisan's Ultimate Refining Stone", 2], ["Tanned Thick Balaur Leather", 11], ["Wrathful Mind", 5], ["Radiant Orichalcum Ore", 4], ["Radiant Odyle", 2]]}, {"id": "roi", "title": "Jambières du roi dragon noir", "grade": "Roi dragon", "color": "--g-roi", "lvl": null, "rows": [["Artisan's Splendent Orichalcum Greaves", 1, "bleu"], ["Artisan's Ultimate Refining Stone", 2], ["Tanned Hard Balaur Leather", 14], ["Wrathful Mind", 2], ["Wrathful Will", 8], ["Radiant Orichalcum Ore", 6], ["Radiant Odyle", 4]]}]}, {"id": "casque", "label": "Casque", "tiers": [{"id": "blanc", "title": "Craft blanc", "grade": "Blanc", "color": "--g-blanc", "lvl": "3", "rows": [["Orichalcum Ingot", 1], ["Strong Leather", 3], ["Refining Stone", 2], ["Odyle", 1]]}, {"id": "vert", "title": "Craft vert", "grade": "Vert", "color": "--g-vert", "lvl": "15", "rows": [["Splendent Orichalcum Helm", 1, "blanc"], ["Expert's Refining Stone", 2], ["Fine Orichalcum Ore", 3], ["Fine Odyle", 1]]}, {"id": "bleu", "title": "Craft bleu", "grade": "Bleu", "color": "--g-bleu", "lvl": "30", "rows": [["Expert's Splendent Orichalcum Helm", 1, "vert"], ["Artisan's Refining Stone", 2], ["Pure Orichalcum Ore", 3], ["Pure Odyle", 2]]}, {"id": "gold", "title": "Craft gold", "grade": "Gold", "color": "--g-gold", "lvl": "55", "rows": [["Artisan's Splendent Orichalcum Helm", 1, "bleu"], ["Artisan's Ultimate Refining Stone", 2], ["Tanned Thick Balaur Leather", 9], ["Wrathful Mind", 4], ["Radiant Orichalcum Ore", 3], ["Radiant Odyle", 2]]}, {"id": "roi", "title": "Casque du roi dragon noir", "grade": "Roi dragon", "color": "--g-roi", "lvl": null, "rows": [["Artisan's Splendent Orichalcum Helm", 1, "bleu"], ["Artisan's Ultimate Refining Stone", 2], ["Tanned Hard Balaur Leather", 12], ["Wrathful Mind", 2], ["Wrathful Will", 6], ["Radiant Orichalcum Ore", 5], ["Radiant Odyle", 3]]}]}, {"id": "gants", "label": "Gants", "tiers": [{"id": "blanc", "title": "Craft blanc", "grade": "Blanc", "color": "--g-blanc", "lvl": "5", "rows": [["Orichalcum Ingot", 1], ["Strong Leather", 2], ["Refining Stone", 2], ["Odyle", 1]]}, {"id": "vert", "title": "Craft vert", "grade": "Vert", "color": "--g-vert", "lvl": "20", "rows": [["Splendent Orichalcum Gloves", 1, "blanc"], ["Expert's Refining Stone", 2], ["Fine Orichalcum Ore", 2], ["Fine Odyle", 1]]}, {"id": "bleu", "title": "Craft bleu", "grade": "Bleu", "color": "--g-bleu", "lvl": "35", "rows": [["Expert's Splendent Orichalcum Gloves", 1, "vert"], ["Artisan's Refining Stone", 2], ["Pure Orichalcum Ore", 3], ["Pure Odyle", 2]]}, {"id": "gold", "title": "Craft gold", "grade": "Gold", "color": "--g-gold", "lvl": "60", "rows": [["Artisan's Splendent Orichalcum Gloves", 1, "bleu"], ["Artisan's Ultimate Refining Stone", 2], ["Tanned Thick Balaur Leather", 7], ["Wrathful Mind", 3], ["Radiant Orichalcum Ore", 2], ["Radiant Odyle", 2]]}, {"id": "roi", "title": "Gants du roi dragon noir", "grade": "Roi dragon", "color": "--g-roi", "lvl": null, "rows": [["Artisan's Splendent Orichalcum Gloves", 1, "bleu"], ["Artisan's Ultimate Refining Stone", 2], ["Tanned Hard Balaur Leather", 10], ["Wrathful Mind", 2], ["Wrathful Will", 5], ["Radiant Orichalcum Ore", 4], ["Radiant Odyle", 2]]}]}, {"id": "bottes", "label": "Bottes", "tiers": [{"id": "blanc", "title": "Craft blanc", "grade": "Blanc", "color": "--g-blanc", "lvl": "10", "rows": [["Orichalcum Ingot", 1], ["Strong Leather", 3], ["Refining Stone", 2], ["Odyle", 1]]}, {"id": "vert", "title": "Craft vert", "grade": "Vert", "color": "--g-vert", "lvl": "25", "rows": [["Splendent Orichalcum Boots", 1, "blanc"], ["Expert's Refining Stone", 2], ["Fine Orichalcum Ore", 3], ["Fine Odyle", 1]]}, {"id": "bleu", "title": "Craft bleu", "grade": "Bleu", "color": "--g-bleu", "lvl": "40", "rows": [["Expert's Splendent Orichalcum Boots", 1, "vert"], ["Artisan's Refining Stone", 2], ["Pure Orichalcum Ore", 3], ["Pure Odyle", 2]]}, {"id": "gold", "title": "Craft gold", "grade": "Gold", "color": "--g-gold", "lvl": "60", "rows": [["Artisan's Splendent Orichalcum Boots", 1, "bleu"], ["Artisan's Ultimate Refining Stone", 2], ["Tanned Thick Balaur Leather", 9], ["Wrathful Mind", 5], ["Radiant Orichalcum Ore", 2], ["Radiant Odyle", 2]]}, {"id": "roi", "title": "Bottes du roi dragon noir", "grade": "Roi dragon", "color": "--g-roi", "lvl": null, "rows": [["Artisan's Splendent Orichalcum Boots", 1, "bleu"], ["Artisan's Ultimate Refining Stone", 3], ["Tanned Hard Balaur Leather", 12], ["Wrathful Mind", 2], ["Wrathful Will", 8], ["Radiant Orichalcum Ore", 5], ["Radiant Odyle", 3]]}]}, {"id": "epaulieres", "label": "Épaulières", "tiers": [{"id": "blanc", "title": "Craft blanc", "grade": "Blanc", "color": "--g-blanc", "lvl": "5", "rows": [["Orichalcum Ingot", 1], ["Strong Leather", 3], ["Refining Stone", 2], ["Odyle", 1]]}, {"id": "vert", "title": "Craft vert", "grade": "Vert", "color": "--g-vert", "lvl": "20", "rows": [["Splendent Orichalcum Pauldrons", 1, "blanc"], ["Expert's Refining Stone", 2], ["Fine Orichalcum Ore", 3], ["Fine Odyle", 1]]}, {"id": "bleu", "title": "Craft bleu", "grade": "Bleu", "color": "--g-bleu", "lvl": "35", "rows": [["Expert's Splendent Orichalcum Pauldrons", 1, "vert"], ["Artisan's Refining Stone", 2], ["Pure Orichalcum Ore", 3], ["Pure Odyle", 2]]}, {"id": "gold", "title": "Craft gold", "grade": "Gold", "color": "--g-gold", "lvl": "55", "rows": [["Artisan's Splendent Orichalcum Pauldrons", 1, "bleu"], ["Artisan's Ultimate Refining Stone", 2], ["Tanned Thick Balaur Leather", 9], ["Wrathful Mind", 4], ["Radiant Orichalcum Ore", 3], ["Radiant Odyle", 2]]}, {"id": "roi", "title": "Épaulières du roi dragon noir", "grade": "Roi dragon", "color": "--g-roi", "lvl": null, "rows": [["Artisan's Splendent Orichalcum Pauldrons", 1, "bleu"], ["Artisan's Ultimate Refining Stone", 2], ["Tanned Hard Balaur Leather", 12], ["Wrathful Mind", 2], ["Wrathful Will", 6], ["Radiant Orichalcum Ore", 5], ["Radiant Odyle", 3]]}]}, {"id": "cape", "label": "Cape", "tiers": [{"id": "blanc", "title": "Craft blanc", "grade": "Blanc", "color": "--g-blanc", "lvl": "10", "rows": [["Orichalcum Ingot", 1], ["Strong Leather", 2], ["Refining Stone", 2], ["Odyle", 1]]}, {"id": "vert", "title": "Craft vert", "grade": "Vert", "color": "--g-vert", "lvl": "25", "rows": [["Splendent Orichalcum Cloak", 1, "blanc"], ["Expert's Refining Stone", 2], ["Fine Orichalcum Ore", 2], ["Fine Odyle", 1]]}, {"id": "bleu", "title": "Craft bleu", "grade": "Bleu", "color": "--g-bleu", "lvl": "40", "rows": [["Expert's Splendent Orichalcum Cloak", 1, "vert"], ["Artisan's Refining Stone", 2], ["Pure Orichalcum Ore", 3], ["Pure Odyle", 2]]}, {"id": "gold", "title": "Craft gold", "grade": "Gold", "color": "--g-gold", "lvl": "60", "rows": [["Artisan's Splendent Orichalcum Cloak", 1, "bleu"], ["Artisan's Ultimate Refining Stone", 2], ["Tanned Thick Balaur Leather", 7], ["Wrathful Mind", 3], ["Radiant Orichalcum Ore", 2], ["Radiant Odyle", 2]]}, {"id": "roi", "title": "Cape du roi dragon noir", "grade": "Roi dragon", "color": "--g-roi", "lvl": null, "rows": [["Artisan's Splendent Orichalcum Cloak", 1, "bleu"], ["Artisan's Ultimate Refining Stone", 2], ["Tanned Hard Balaur Leather", 10], ["Wrathful Mind", 2], ["Wrathful Will", 5], ["Radiant Orichalcum Ore", 4], ["Radiant Odyle", 2]]}]}], "source": "Recettes : dbaion2.ru, côté Asmodien (Star / Dark Dragon Lord). Prix de départ repris de « craft arme.xlsx » quand le matériau est le même. À vérifier en jeu.", "notice": "Recettes côté Asmodien. Les prix déjà connus pour l'arme sont repris (pierres, od, minerai, intention et volonté de rage). Le cuir et les pièces proc sont à remplir. Un prix vide compte pour 0 (matériau récolté ou crafté toi-même). Les taux de réussite sont propres à ce métier."}, "craft": {"label": "Artisanat", "trade": "artisanat", "sheets": [{"id": "collier", "label": "Collier", "tiers": [{"id": "blanc", "title": "Craft blanc", "grade": "Blanc", "color": "--g-blanc", "lvl": "10", "rows": [["Ruby Decoration", 1], ["Refining Stone", 4], ["Odyle", 1]]}, {"id": "vert", "title": "Craft vert", "grade": "Vert", "color": "--g-vert", "lvl": "25", "rows": [["Splendent Ruby Necklace", 1, "blanc"], ["Expert's Refining Stone", 4], ["Fine Ruby Gemstone", 4], ["Fine Odyle", 2]]}, {"id": "bleu", "title": "Craft bleu", "grade": "Bleu", "color": "--g-bleu", "lvl": "40", "rows": [["Expert's Splendent Ruby Necklace", 1, "vert"], ["Artisan's Refining Stone", 4], ["Pure Ruby Gemstone", 5], ["Pure Odyle", 2]]}, {"id": "gold", "title": "Craft gold", "grade": "Gold", "color": "--g-gold", "lvl": "60", "rows": [["Artisan's Splendent Ruby Necklace", 1, "bleu"], ["Artisan's Ultimate Refining Stone", 3], ["Enhanced Thick Balaur Scale", 14], ["Wrathful Mind", 6], ["Radiant Ruby Gemstone", 6], ["Radiant Odyle", 2]]}, {"id": "roi", "title": "Collier du roi dragon noir", "grade": "Roi dragon", "color": "--g-roi", "lvl": null, "rows": [["Artisan's Splendent Ruby Necklace", 1, "bleu"], ["Artisan's Ultimate Refining Stone", 3], ["Enhanced Hard Balaur Scale", 19], ["Wrathful Mind", 2], ["Wrathful Will", 9], ["Radiant Ruby Gemstone", 8], ["Radiant Odyle", 5]]}]}, {"id": "boucles", "label": "Boucles d'oreilles", "tiers": [{"id": "blanc", "title": "Craft blanc", "grade": "Blanc", "color": "--g-blanc", "lvl": "5", "rows": [["Diamond Decoration", 1], ["Refining Stone", 3], ["Odyle", 1]]}, {"id": "vert", "title": "Craft vert", "grade": "Vert", "color": "--g-vert", "lvl": "20", "rows": [["Splendent Diamond Earrings", 1, "blanc"], ["Expert's Refining Stone", 3], ["Fine Diamond Gemstone", 3], ["Fine Odyle", 2]]}, {"id": "bleu", "title": "Craft bleu", "grade": "Bleu", "color": "--g-bleu", "lvl": "35", "rows": [["Expert's Splendent Diamond Earrings", 1, "vert"], ["Artisan's Refining Stone", 3], ["Pure Diamond Gemstone", 4], ["Pure Odyle", 2]]}, {"id": "gold", "title": "Craft gold", "grade": "Gold", "color": "--g-gold", "lvl": "60", "rows": [["Artisan's Splendent Diamond Earrings", 1, "bleu"], ["Artisan's Ultimate Refining Stone", 2], ["Enhanced Thick Balaur Scale", 11], ["Wrathful Mind", 5], ["Radiant Diamond Gemstone", 5], ["Radiant Odyle", 2]]}, {"id": "roi", "title": "Boucles d'oreilles du roi dragon noir", "grade": "Roi dragon", "color": "--g-roi", "lvl": null, "rows": [["Artisan's Splendent Diamond Earrings", 1, "bleu"], ["Artisan's Ultimate Refining Stone", 3], ["Enhanced Hard Balaur Scale", 15], ["Wrathful Mind", 2], ["Wrathful Will", 8], ["Radiant Diamond Gemstone", 6], ["Radiant Odyle", 4]]}]}, {"id": "anneau", "label": "Anneau", "tiers": [{"id": "blanc", "title": "Craft blanc", "grade": "Blanc", "color": "--g-blanc", "lvl": "3", "rows": [["Sapphire Decoration", 1], ["Refining Stone", 2], ["Odyle", 1]]}, {"id": "vert", "title": "Craft vert", "grade": "Vert", "color": "--g-vert", "lvl": "15", "rows": [["Splendent Sapphire Ring", 1, "blanc"], ["Expert's Refining Stone", 2], ["Fine Sapphire Gemstone", 2], ["Fine Odyle", 1]]}, {"id": "bleu", "title": "Craft bleu", "grade": "Bleu", "color": "--g-bleu", "lvl": "30", "rows": [["Expert's Splendent Sapphire Ring", 1, "vert"], ["Artisan's Refining Stone", 2], ["Pure Sapphire Gemstone", 3], ["Pure Odyle", 1]]}, {"id": "gold", "title": "Craft gold", "grade": "Gold", "color": "--g-gold", "lvl": "55", "rows": [["Artisan's Splendent Sapphire Ring", 1, "bleu"], ["Artisan's Ultimate Refining Stone", 2], ["Enhanced Thick Balaur Scale", 8], ["Wrathful Mind", 4], ["Radiant Sapphire Gemstone", 3], ["Radiant Odyle", 2]]}, {"id": "roi", "title": "Anneau du roi dragon noir", "grade": "Roi dragon", "color": "--g-roi", "lvl": null, "rows": [["Artisan's Splendent Sapphire Ring", 1, "bleu"], ["Artisan's Ultimate Refining Stone", 2], ["Enhanced Hard Balaur Scale", 11], ["Wrathful Mind", 2], ["Wrathful Will", 6], ["Radiant Sapphire Gemstone", 5], ["Radiant Odyle", 3]]}]}, {"id": "bracelet", "label": "Bracelet", "tiers": [{"id": "blanc", "title": "Bracelet du vieux commandant mercenaire", "grade": "Blanc", "color": "--g-blanc", "lvl": "10", "rows": [["Magic Crystal", 1], ["Refining Stone", 2], ["Odyle", 1]], "noProc": true}, {"id": "vert", "title": "Bracelet du poursuivant", "grade": "Vert", "color": "--g-vert", "lvl": "25", "rows": [["Old Mercenary Commander Bracelet", 3, "blanc"], ["Expert's Refining Stone", 2], ["Fine Odyle", 2]], "noProc": true}, {"id": "bleu", "title": "Bracelet du libérateur", "grade": "Bleu", "color": "--g-bleu", "lvl": "40", "rows": [["Chaser Bracelet", 3, "vert"], ["Artisan's Refining Stone", 2], ["Pure Odyle", 3]], "noProc": true}], "notice": "Les bracelets n'ont pas de proc : chaque palier se fait avec 3 bracelets du palier précédent, et la chaîne s'arrête au bracelet du libérateur."}], "source": "Recettes : dbaion2.ru, côté Asmodien (Star / Dark Dragon Lord). Prix de départ repris de « craft arme.xlsx » quand le matériau est le même. À vérifier en jeu.", "notice": "Recettes côté Asmodien. Les prix déjà connus pour l'arme sont repris. Les ornements, gemmes, écailles et pièces proc sont à remplir. Un prix vide compte pour 0 (matériau récolté ou crafté toi-même). Les taux de réussite sont propres à ce métier."}}, "alch": [{"id": "courage", "short": "Courage", "title": "Parchemin de courage supérieur", "lvl": 70, "best": 90.9, "rows": [["Courage Scroll (Bound)", 1], ["Sapphire Powder", 3], ["Asvata Paper", 1], ["Professional Ink (Bound)", 1]]}, {"id": "course", "short": "Course", "title": "Parchemin de course supérieur", "lvl": 65, "best": 90.9, "rows": [["Speed Scroll (Bound)", 1], ["Ruby Powder", 3], ["Asvata Paper", 1], ["Professional Ink (Bound)", 1]]}, {"id": "protection", "short": "Protection", "title": "Parchemin de protection supérieur", "lvl": 75, "best": 88.1, "note": "Recette trouvée sous le nom anglais « Superior Benediction Scroll » (PV max +15 %, PM max +200 pendant 5 min). Vérifie que c'est bien ton parchemin de protection.", "rows": [["Benediction Scroll (Bound)", 1], ["Diamond Powder", 3], ["Asvata Paper", 1], ["Professional Ink (Bound)", 1]]}, {"id": "resist", "short": "Résistance", "title": "Parchemin de résistance aux altérations d'état supérieur", "lvl": 95, "best": 85.2, "note": "Je n'ai trouvé que la recette du parchemin de résistance aux altérations d'état, sans version « supérieure ». C'est elle qui est affichée.", "rows": [["Diamond Powder", 3], ["Spiritstone Powder", 5], ["Asvata Paper", 1], ["Exceptional Ink (Bound)", 1]]}]};
+  var KEY = "forge-aion2-v3";
+  var RATE_DEFAULT = { success: 94.639789, proc: 25, combo: 97.397412 };
   var ALCH_SUCCESS = 72.9;
-  var KEY = "forge-aion2-v2";
+  var GEAR = ["forge", "armor", "craft"];
+  var HASH = { forge: "forgeron", armor: "armure", craft: "artisanat", alch: "alchimie", prix: "prix" };
+  var JOBC = { forge: "var(--accent)", armor: "var(--armor)", craft: "var(--craft)" };
 
-  function defaults() {
-    var f = { success: 94.639789, proc: 25, combo: 97.397412, sheets: {} };
-    Object.keys(SHEETS).forEach(function (k) {
-      f.sheets[k] = FORGE.map(function (t) { return t.rows.map(function (r) { return [r[1], r[2]]; }); });
+  function num(v) { return typeof v === "number" && !isNaN(v); }
+  function sheetOf(j, id) { return DATA.jobs[j].sheets.filter(function (s) { return s.id === id; })[0]; }
+
+  function fresh() {
+    var s = { prices: {}, jobs: {}, alch: [] };
+    GEAR.forEach(function (j) {
+      s.jobs[j] = { success: RATE_DEFAULT.success, proc: RATE_DEFAULT.proc, combo: RATE_DEFAULT.combo, sheet: DATA.jobs[j].sheets[0].id, qty: {} };
     });
-    var a = ALCH.map(function (r) {
-      return { success: ALCH_SUCCESS, sale: null, qty: 10, rows: r.rows.map(function (x) { return [x[1], null]; }) };
-    });
-    return { forge: f, alch: a };
+    DATA.alch.forEach(function () { s.alch.push({ success: ALCH_SUCCESS, sale: null, qty: 10, q: {} }); });
+    return s;
   }
-  var state = defaults();
+  var state = fresh();
+
+  function migrateForge(f) {
+    if (!f || !f.sheets) return;
+    var J = state.jobs.forge;
+    ["success", "proc", "combo"].forEach(function (k) { if (num(f[k])) J[k] = f[k]; });
+    ["guard", "arme"].forEach(function (sid) {
+      var sh = sheetOf("forge", sid), rows = f.sheets[sid];
+      if (!sh || !rows) return;
+      rows.forEach(function (tr, ti) {
+        (tr || []).forEach(function (v, ri) {
+          var row = sh.tiers[ti] && sh.tiers[ti].rows[ri];
+          if (!row || !v) return;
+          if (num(v[0]) && v[0] !== row[1]) J.qty[sid + ":" + ti + ":" + ri] = v[0];
+          if (v[1] === null || num(v[1])) state.prices[row[0]] = v[1];
+        });
+      });
+    });
+  }
+  function migrateAlch(list) {
+    list.forEach(function (a, i) {
+      var d = DATA.alch[i], s = state.alch[i];
+      if (!d || !s || !a) return;
+      if (num(a.success)) s.success = a.success;
+      if (num(a.sale)) s.sale = a.sale;
+      if (num(a.qty)) s.qty = a.qty;
+      (a.rows || []).forEach(function (v, ri) {
+        var row = d.rows[ri];
+        if (!row || !v) return;
+        if (num(v[0]) && v[0] !== row[1]) s.q[ri] = v[0];
+        if (num(v[1])) state.prices[row[0]] = v[1];
+      });
+    });
+  }
   try {
     var saved = JSON.parse(localStorage.getItem(KEY) || "null");
-    if (saved && saved.forge && saved.forge.sheets && saved.alch && saved.alch.length === ALCH.length) {
-      state = saved;
+    if (saved && saved.jobs && saved.prices) {
+      state.prices = saved.prices;
+      GEAR.forEach(function (j) {
+        var o = saved.jobs[j], J = state.jobs[j];
+        if (!o) return;
+        ["success", "proc", "combo"].forEach(function (k) { if (num(o[k])) J[k] = o[k]; });
+        if (o.sheet && sheetOf(j, o.sheet)) J.sheet = o.sheet;
+        if (o.qty) J.qty = o.qty;
+      });
+      (saved.alch || []).forEach(function (a, i) {
+        var s = state.alch[i];
+        if (!s || !a) return;
+        if (num(a.success)) s.success = a.success;
+        if (num(a.sale)) s.sale = a.sale;
+        if (num(a.qty)) s.qty = a.qty;
+        if (a.q) s.q = a.q;
+      });
     } else {
-      var old = JSON.parse(localStorage.getItem("forge-aion2-v1") || "null");
-      if (old && old.sheets && old.sheets.arme && old.sheets.guard) state.forge = old;
+      var v2 = JSON.parse(localStorage.getItem("forge-aion2-v2") || "null");
+      var v1 = JSON.parse(localStorage.getItem("forge-aion2-v1") || "null");
+      migrateForge((v2 && v2.forge) || v1);
+      if (v2 && v2.alch) migrateAlch(v2.alch);
     }
   } catch (e) {}
-  var base = defaults();
-  ["success", "proc", "combo"].forEach(function (k) { if (typeof state.forge[k] !== "number") state.forge[k] = base.forge[k]; });
-  state.alch.forEach(function (r) {
-    if (typeof r.success !== "number") r.success = ALCH_SUCCESS;
-    if (typeof r.qty !== "number") r.qty = 10;
-  });
   function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
-
-  var hash = location.hash.slice(1);
-  var job = hash === "alchimie" ? "alch" : "forge";
-  var sheet = hash === "guard" ? "guard" : "arme";
 
   var fmt = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 });
   var fmt2 = new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -318,109 +359,147 @@ footer { color: var(--muted); font-size: 13px; display: grid; gap: 4px; }
     return d === "" ? null : Number(d);
   }
   function rate(v) { return v == null || isNaN(v) ? "" : String(v).replace(".", ","); }
-  function val(v) { return v == null ? "" : fmt.format(v); }
+  function val(v) { return v == null || isNaN(v) ? "" : fmt.format(v); }
   function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;"); }
-  function input(id, k, v, aria, ph) {
-    return '<input class="in" id="' + id + '" data-k="' + k + '" inputmode="numeric"' + (ph ? ' placeholder="' + ph + '"' : "") +
-      ' aria-label="' + esc(aria) + '" value="' + val(v) + '">';
+  function signed(v, f) { return isNaN(v) ? "—" : (v > 0 ? "+" : "") + f(v); }
+  function put(root, sel, text, g) {
+    root.querySelectorAll(sel).forEach(function (el) {
+      el.textContent = text;
+      if (g !== undefined) el.dataset.sign = isNaN(g) ? "" : g >= 0 ? "pos" : "neg";
+    });
   }
-  function sum(rows) { return rows.reduce(function (a, r) { return a + (r[0] || 0) * (r[1] || 0); }, 0); }
-
-  /* ---------- Forgeron ---------- */
-  var F = function () { return state.forge; };
-  function label(s) { return s.replace("{X}", SHEETS[sheet].X).replace("{x}", SHEETS[sheet].x); }
-  function craftFactor() { var s = F().success; return s > 0 ? 100 / s : NaN; }
-  function procFactor() {
-    var s = F().success, p = F().proc, c = F().combo;
-    return s > 0 && p > 0 && c > 0 ? 1e6 / (s * p * c) : NaN;
+  function price(key) {
+    if (Object.prototype.hasOwnProperty.call(state.prices, key)) return state.prices[key];
+    var d = DATA.price[key];
+    return d == null ? null : d;
   }
-  function forgeTotals() {
-    return F().sheets[sheet].map(function (rows) {
-      var raw = sum(rows);
-      return { raw: raw, craft: raw * craftFactor(), avg: raw * procFactor() };
+  function priceInput(id, key, aria) {
+    return '<input class="in" id="' + id + '" data-price="' + esc(key) + '" inputmode="numeric" placeholder="0" aria-label="' +
+      esc("Prix " + aria) + '" value="' + val(price(key)) + '">';
+  }
+  function numInput(id, attr, v, aria) {
+    return '<input class="in" id="' + id + '" ' + attr + ' inputmode="numeric" aria-label="' + esc(aria) + '" value="' + val(v) + '">';
+  }
+  function syncPrice(key, except) {
+    document.querySelectorAll("input[data-price]").forEach(function (el) {
+      if (el !== except && el.dataset.price === key) el.value = val(price(key));
     });
   }
 
+  /* ---------- Équipement : forgeron, armure, artisanat ---------- */
+  var job = "forge";
+  var gearPanel = document.getElementById("panel-gear");
   var ladder = document.getElementById("ladder");
   var tiers = document.getElementById("tiers");
+  var RATES = [["successRate", "success"], ["procRate", "proc"], ["comboRate", "combo"]];
 
-  function renderForge() {
-    var data = F().sheets[sheet];
-    ladder.innerHTML = FORGE.map(function (t) {
+  function J() { return state.jobs[job]; }
+  function curSheet() { return sheetOf(job, J().sheet) || DATA.jobs[job].sheets[0]; }
+  function qtyOf(sid, ti, ri, def) { var o = J().qty[sid + ":" + ti + ":" + ri]; return o === undefined ? def : o; }
+  function factors() {
+    var o = J();
+    return {
+      craft: o.success > 0 ? 100 / o.success : NaN,
+      proc: o.success > 0 && o.proc > 0 && o.combo > 0 ? 1e6 / (o.success * o.proc * o.combo) : NaN
+    };
+  }
+  function gearTotals() {
+    var sh = curSheet(), f = factors();
+    return sh.tiers.map(function (t, ti) {
+      var raw = 0;
+      t.rows.forEach(function (r, ri) { raw += (qtyOf(sh.id, ti, ri, r[1]) || 0) * (price(r[0]) || 0); });
+      return { raw: raw, craft: raw * f.craft, avg: t.noProc ? NaN : raw * f.proc, out: t.noProc ? raw * f.craft : raw * f.proc };
+    });
+  }
+
+  function renderGear() {
+    var sh = curSheet(), jd = DATA.jobs[job];
+    gearPanel.style.setProperty("--jobc", JOBC[job]);
+    document.getElementById("sheetTabs").innerHTML = jd.sheets.map(function (s) {
+      return '<button type="button" role="tab" id="sheet-' + s.id + '" data-sheet="' + s.id + '" aria-selected="' + (s.id === sh.id) + '">' + s.label + '</button>';
+    }).join("");
+    document.getElementById("gearNotice").textContent = (sh.notice || jd.notice || "");
+    document.getElementById("gearNotice").hidden = !(sh.notice || jd.notice);
+    document.getElementById("gearSource").textContent = jd.source;
+    document.getElementById("successHint").textContent = "Dépend de ton niveau en " + jd.trade;
+    RATES.forEach(function (p) {
+      var el = document.getElementById(p[0]);
+      if (document.activeElement !== el) el.value = rate(J()[p[1]]);
+    });
+
+    ladder.style.setProperty("--cols", sh.tiers.length);
+    ladder.classList.toggle("odd", sh.tiers.length % 2 === 1);
+    ladder.innerHTML = sh.tiers.map(function (t) {
       return '<a class="rung" href="#t-' + t.id + '" style="--grade: var(' + t.color + ')">' +
         '<span class="name">' + t.grade + '</span>' +
-        '<span class="lbl">Coût moyen proc</span><span class="big num" data-avg="' + t.id + '"></span>' +
-        '<span class="small">1 craft : <span class="num" data-craft="' + t.id + '"></span></span></a>';
+        '<span class="lbl">' + (t.noProc ? "Coût d'un craft" : "Coût moyen proc") + '</span><span class="big num" data-out="' + t.id + '"></span>' +
+        (t.noProc ? "" : '<span class="small">1 craft : <span class="num" data-craft="' + t.id + '"></span></span>') + '</a>';
     }).join("");
 
-    tiers.innerHTML = FORGE.map(function (t, ti) {
+    tiers.innerHTML = sh.tiers.map(function (t, ti) {
       var rows = t.rows.map(function (r, ri) {
-        var v = data[ti][ri], name = label(r[0]);
-        var hint = r[3] ? '<span class="hint">Proc ' + r[3] + ' calculé : <button type="button" data-use="' + ti + ':' + ri + ':' + r[3] + '"><span class="num" data-avg="' + r[3] + '"></span></button></span>' : "";
+        var name = DATA.mat[r[0]] || r[0], hint = "";
+        if (r[2]) {
+          var src = sh.tiers.filter(function (x) { return x.id === r[2]; })[0];
+          hint = '<span class="hint">' + (src.noProc ? "Coût calculé : " : "Proc " + r[2] + " calculé : ") +
+            '<button type="button" data-use="' + ti + ':' + ri + ':' + r[2] + '"><span class="num" data-hint="' + r[2] + '"></span></button></span>';
+        }
         return '<tr><td>' + name + hint + '</td>' +
-          '<td class="qty r">' + input("q-" + ti + "-" + ri, "f:" + ti + ":" + ri + ":0", v[0], "Quantité " + name) + '</td>' +
-          '<td class="price r">' + input("p-" + ti + "-" + ri, "f:" + ti + ":" + ri + ":1", v[1], "Valeur unitaire " + name, "prix ?") + '</td>' +
-          '<td class="cost r num" data-cost="f:' + ti + ':' + ri + '"></td></tr>';
+          '<td class="qty r">' + numInput("q-" + sh.id + "-" + ti + "-" + ri, 'data-q="' + sh.id + ':' + ti + ':' + ri + '"', qtyOf(sh.id, ti, ri, r[1]), "Quantité " + name) + '</td>' +
+          '<td class="price r">' + priceInput("p-" + sh.id + "-" + ti + "-" + ri, r[0], name) + '</td>' +
+          '<td class="cost r num" data-cost="' + ti + ':' + ri + '"></td></tr>';
       }).join("");
       return '<article class="tier" id="t-' + t.id + '" style="--grade: var(' + t.color + ')">' +
-        '<div class="tier-head"><h2>' + label(t.title) + ' <span class="chip">' + t.grade + '</span></h2>' +
-        '<span class="proc">Coût moyen proc <b class="num" data-avg="' + t.id + '"></b></span></div>' +
+        '<div class="tier-head"><h2>' + t.title + ' <span class="chip">' + t.grade + '</span>' +
+        (t.lvl ? ' <span class="chip plain">Maîtrise ' + t.lvl + '</span>' : "") + '</h2>' +
+        '<span class="proc">' + (t.noProc ? "Coût d'un craft" : "Coût moyen proc") + ' <b class="num" data-out="' + t.id + '"></b></span></div>' +
         '<div class="scroll"><table><thead><tr><th>Matériau</th><th class="r">Quantité</th><th class="r">Valeur unitaire</th><th class="r">Coût total</th></tr></thead>' +
         '<tbody>' + rows +
         '<tr class="raw"><td colspan="3">Coût des matériaux</td><td class="r num" data-raw="' + t.id + '"></td></tr>' +
-        '<tr class="total"><td colspan="3">Coût total craft (échecs compris)</td><td class="r num" data-craft="' + t.id + '"></td></tr>' +
-        '<tr class="avg"><td colspan="3">Coût moyen proc</td><td class="r num" data-avg="' + t.id + '"></td></tr>' +
+        '<tr class="' + (t.noProc ? "avg" : "total") + '"><td colspan="3">Coût total craft (échecs compris)</td><td class="r num" data-craft="' + t.id + '"></td></tr>' +
+        (t.noProc ? "" : '<tr class="avg"><td colspan="3">Coût moyen proc</td><td class="r num" data-avg="' + t.id + '"></td></tr>') +
         '</tbody></table></div></article>';
     }).join("");
-
-    document.querySelectorAll(".tabs button").forEach(function (b) {
-      b.setAttribute("aria-selected", String(b.dataset.sheet === sheet));
-    });
-    document.getElementById("guardNotice").hidden = sheet !== "guard";
-    RATES.forEach(function (p) {
-      var el = document.getElementById(p[0]);
-      if (document.activeElement !== el) el.value = rate(F()[p[1]]);
-    });
-    updateForge();
+    updateGear();
   }
 
-  function updateForge() {
-    var data = F().sheets[sheet];
-    var tot = forgeTotals();
-    data.forEach(function (rows, ti) {
-      rows.forEach(function (v, ri) {
-        var el = tiers.querySelector('[data-cost="f:' + ti + ':' + ri + '"]');
-        if (el) el.textContent = v[1] == null ? "—" : show((v[0] || 0) * v[1]);
+  function updateGear() {
+    var sh = curSheet(), tot = gearTotals(), f = factors();
+    sh.tiers.forEach(function (t, ti) {
+      t.rows.forEach(function (r, ri) {
+        var el = tiers.querySelector('[data-cost="' + ti + ':' + ri + '"]'), p = price(r[0]);
+        if (el) el.textContent = show((qtyOf(sh.id, ti, ri, r[1]) || 0) * (p || 0));
       });
+      put(gearPanel, '[data-raw="' + t.id + '"]', show(tot[ti].raw));
+      put(gearPanel, '[data-craft="' + t.id + '"]', show(tot[ti].craft));
+      put(gearPanel, '[data-avg="' + t.id + '"]', show(tot[ti].avg));
+      put(gearPanel, '[data-out="' + t.id + '"]', show(tot[ti].out));
+      put(gearPanel, '[data-hint="' + t.id + '"]', show(tot[ti].out));
     });
-    FORGE.forEach(function (t, ti) {
-      tiers.querySelectorAll('[data-raw="' + t.id + '"]').forEach(function (el) { el.textContent = show(tot[ti].raw); });
-      document.querySelectorAll('#panel-forge [data-craft="' + t.id + '"]').forEach(function (el) { el.textContent = show(tot[ti].craft); });
-      document.querySelectorAll('#panel-forge [data-avg="' + t.id + '"]').forEach(function (el) { el.textContent = show(tot[ti].avg); });
-    });
-    var mc = craftFactor(), mp = procFactor();
-    document.getElementById("multCraft").textContent = isNaN(mc) ? "—" : fmt2.format(mc);
-    document.getElementById("multProc").textContent = isNaN(mp) ? "—" : fmt2.format(mp);
+    document.getElementById("multCraft").textContent = isNaN(f.craft) ? "—" : fmt2.format(f.craft);
+    document.getElementById("multProc").textContent = isNaN(f.proc) ? "—" : fmt2.format(f.proc);
   }
 
   /* ---------- Alchimie ---------- */
+  var alchPanel = document.getElementById("panel-alch");
   var alchLadder = document.getElementById("alchLadder");
   var alchTiers = document.getElementById("alchTiers");
 
+  function aq(i, ri) { var o = state.alch[i].q[ri]; return o === undefined ? DATA.alch[i].rows[ri][1] : o; }
   function alchTotals() {
-    return state.alch.map(function (r) {
-      var raw = sum(r.rows);
-      var priced = r.rows.filter(function (x) { return x[1] != null; }).length;
-      var real = priced ? raw * (r.success > 0 ? 100 / r.success : NaN) : NaN;
+    return state.alch.map(function (r, i) {
+      var raw = 0;
+      DATA.alch[i].rows.forEach(function (m, ri) { raw += (aq(i, ri) || 0) * (price(m[0]) || 0); });
+      var real = raw * (r.success > 0 ? 100 / r.success : NaN);
       var n = r.qty || 0, sale = r.sale == null ? NaN : r.sale;
-      return { raw: priced ? raw : NaN, real: real, gain: sale - real, missing: r.rows.length - priced,
+      return { raw: raw, real: real, gain: sale - real,
         tries: r.success > 0 ? n * 100 / r.success : NaN, inv: real * n, rev: sale * n, tot: (sale - real) * n,
         roi: real > 0 ? (sale - real) / real : NaN };
     });
   }
 
   function renderAlch() {
-    alchLadder.innerHTML = ALCH.map(function (t, i) {
+    alchLadder.innerHTML = DATA.alch.map(function (t, i) {
       return '<a class="rung" href="#a-' + t.id + '" style="--grade: var(--alch)">' +
         '<span class="name">' + t.short + '</span>' +
         '<span class="lbl">Coût par parchemin</span><span class="big num" data-areal="' + i + '"></span>' +
@@ -429,14 +508,14 @@ footer { color: var(--muted); font-size: 13px; display: grid; gap: 4px; }
         '<span class="small">Gain pour <span class="num" data-aqty="' + i + '"></span> : <span class="num" data-atot="' + i + '"></span></span></a>';
     }).join("");
 
-    alchTiers.innerHTML = ALCH.map(function (t, i) {
+    alchTiers.innerHTML = DATA.alch.map(function (t, i) {
       var r = state.alch[i];
       var rows = t.rows.map(function (m, ri) {
-        var v = r.rows[ri];
-        return '<tr><td>' + m[0] + '</td>' +
-          '<td class="qty r">' + input("aq-" + i + "-" + ri, "a:" + i + ":" + ri + ":0", v[0], "Quantité " + m[0]) + '</td>' +
-          '<td class="price r">' + input("ap-" + i + "-" + ri, "a:" + i + ":" + ri + ":1", v[1], "Valeur unitaire " + m[0], "prix ?") + '</td>' +
-          '<td class="cost r num" data-cost="a:' + i + ':' + ri + '"></td></tr>';
+        var name = DATA.mat[m[0]] || m[0];
+        return '<tr><td>' + name + '</td>' +
+          '<td class="qty r">' + numInput("aq-" + i + "-" + ri, 'data-aq="' + i + ':' + ri + '"', aq(i, ri), "Quantité " + name) + '</td>' +
+          '<td class="price r">' + priceInput("ap-" + i + "-" + ri, m[0], name) + '</td>' +
+          '<td class="cost r num" data-acost="' + i + ':' + ri + '"></td></tr>';
       }).join("");
       return '<article class="tier" id="a-' + t.id + '" style="--grade: var(--alch)">' +
         '<div class="tier-head"><h2>' + t.title + ' <span class="chip">Maîtrise ' + t.lvl + '</span></h2>' +
@@ -445,11 +524,11 @@ footer { color: var(--muted); font-size: 13px; display: grid; gap: 4px; }
         (t.note ? '<p class="tier-note">' + t.note + '</p>' : "") +
         '<div class="scroll"><table><thead><tr><th>Matériau</th><th class="r">Quantité</th><th class="r">Valeur unitaire</th><th class="r">Coût total</th></tr></thead>' +
         '<tbody>' + rows +
-        '<tr class="raw"><td colspan="3">Coût des matériaux <span class="missing" data-amiss="' + i + '"></span></td><td class="r num" data-araw="' + i + '"></td></tr>' +
+        '<tr class="raw"><td colspan="3">Coût des matériaux</td><td class="r num" data-araw="' + i + '"></td></tr>' +
         '<tr class="avg"><td colspan="3">Coût par parchemin (échecs compris)</td><td class="r num" data-areal="' + i + '"></td></tr>' +
-        '<tr class="sale"><td colspan="3">Prix de vente du parchemin</td><td class="price r">' + input("av-" + i, "s:" + i, r.sale, "Prix de vente " + t.title, "prix ?") + '</td></tr>' +
+        '<tr class="split"><td colspan="3">Prix de vente du parchemin</td><td class="price r">' + numInput("av-" + i, 'data-sale="' + i + '" placeholder="prix ?"', r.sale, "Prix de vente " + t.title) + '</td></tr>' +
         '<tr class="gain"><td colspan="3">Gain par parchemin vendu</td><td class="r num" data-again="' + i + '"></td></tr>' +
-        '<tr class="split"><td colspan="3">Nombre de parchemins à vendre</td><td class="price r">' + input("an-" + i, "n:" + i, r.qty, "Nombre de parchemins à vendre " + t.title) + '</td></tr>' +
+        '<tr class="split"><td colspan="3">Nombre de parchemins à vendre</td><td class="price r">' + numInput("an-" + i, 'data-sold="' + i + '"', r.qty, "Nombre de parchemins à vendre " + t.title) + '</td></tr>' +
         '<tr class="raw"><td colspan="3">Crafts à lancer en moyenne</td><td class="r num" data-atries="' + i + '"></td></tr>' +
         '<tr class="raw"><td colspan="3">Investissement (matériaux, échecs compris)</td><td class="r num" data-ainv="' + i + '"></td></tr>' +
         '<tr class="raw"><td colspan="3">Recette des ventes</td><td class="r num" data-arev="' + i + '"></td></tr>' +
@@ -460,85 +539,102 @@ footer { color: var(--muted); font-size: 13px; display: grid; gap: 4px; }
     updateAlch();
   }
 
-  function put(sel, text, g) {
-    document.querySelectorAll(sel).forEach(function (el) {
-      el.textContent = text;
-      if (g !== undefined) el.dataset.sign = isNaN(g) ? "" : g >= 0 ? "pos" : "neg";
-    });
-  }
-  function signed(v, f) { return isNaN(v) ? "—" : (v > 0 ? "+" : "") + f(v); }
-
   function updateAlch() {
     var tot = alchTotals();
     state.alch.forEach(function (r, i) {
-      r.rows.forEach(function (v, ri) {
-        var el = alchTiers.querySelector('[data-cost="a:' + i + ':' + ri + '"]');
-        if (el) el.textContent = v[1] == null ? "—" : show((v[0] || 0) * v[1]);
-      });
-      document.querySelectorAll('[data-araw="' + i + '"]').forEach(function (el) { el.textContent = show(tot[i].raw); });
-      document.querySelectorAll('[data-areal="' + i + '"]').forEach(function (el) { el.textContent = show(tot[i].real); });
-      document.querySelectorAll('[data-arate="' + i + '"]').forEach(function (el) { el.textContent = isNaN(r.success) ? "—" : rate(r.success) + " %"; });
-      document.querySelectorAll('[data-again="' + i + '"]').forEach(function (el) {
-        var g = tot[i].gain;
-        el.textContent = isNaN(g) ? "—" : (g > 0 ? "+" : "") + show(g);
-        el.dataset.sign = isNaN(g) ? "" : g >= 0 ? "pos" : "neg";
+      DATA.alch[i].rows.forEach(function (m, ri) {
+        var el = alchTiers.querySelector('[data-acost="' + i + ':' + ri + '"]'), p = price(m[0]);
+        if (el) el.textContent = show((aq(i, ri) || 0) * (p || 0));
       });
       var T = tot[i];
-      put('[data-aqty="' + i + '"]', fmt.format(r.qty || 0));
-      put('[data-atries="' + i + '"]', isNaN(T.tries) ? "—" : fmt1.format(T.tries));
-      put('[data-ainv="' + i + '"]', show(T.inv));
-      put('[data-arev="' + i + '"]', show(T.rev));
-      put('[data-atot="' + i + '"]', signed(T.tot, show), T.tot);
-      put('[data-aroi="' + i + '"]', signed(T.roi, pct.format), T.roi);
-      document.querySelectorAll('[data-amiss="' + i + '"]').forEach(function (el) {
-        el.textContent = tot[i].missing ? "· " + tot[i].missing + " prix manquant" + (tot[i].missing > 1 ? "s" : "") : "";
-      });
+      put(alchPanel, '[data-araw="' + i + '"]', show(T.raw));
+      put(alchPanel, '[data-areal="' + i + '"]', show(T.real));
+      put(alchPanel, '[data-arate="' + i + '"]', isNaN(r.success) ? "—" : rate(r.success) + " %");
+      put(alchPanel, '[data-again="' + i + '"]', signed(T.gain, show), T.gain);
+      put(alchPanel, '[data-aqty="' + i + '"]', fmt.format(r.qty || 0));
+      put(alchPanel, '[data-atries="' + i + '"]', isNaN(T.tries) ? "—" : fmt1.format(T.tries));
+      put(alchPanel, '[data-ainv="' + i + '"]', show(T.inv));
+      put(alchPanel, '[data-arev="' + i + '"]', show(T.rev));
+      put(alchPanel, '[data-atot="' + i + '"]', signed(T.tot, show), T.tot);
+      put(alchPanel, '[data-aroi="' + i + '"]', signed(T.roi, pct.format), T.roi);
     });
   }
 
+  /* ---------- Prix des matériaux ---------- */
+  var priceRows = document.getElementById("priceRows");
+  var USED = {};
+  GEAR.forEach(function (j) {
+    DATA.jobs[j].sheets.forEach(function (s) {
+      s.tiers.forEach(function (t) { t.rows.forEach(function (r) { (USED[r[0]] = USED[r[0]] || {})[DATA.jobs[j].label] = 1; }); });
+    });
+  });
+  DATA.alch.forEach(function (t) { t.rows.forEach(function (r) { (USED[r[0]] = USED[r[0]] || {})["Alchimie"] = 1; }); });
+  function byLabel(a, b) { return (DATA.mat[a] || a).localeCompare(DATA.mat[b] || b, "fr"); }
+  function renderPrices() {
+    var groups = [["Matériaux", DATA.groups.mats.slice().sort(byLabel)], ["Équipements intermédiaires", DATA.groups.items.slice().sort(byLabel)]];
+    priceRows.innerHTML = groups.map(function (g) {
+      return '<tr class="group"><td colspan="2">' + g[0] + '</td></tr>' + g[1].map(function (k, n) {
+        var name = DATA.mat[k] || k;
+        return '<tr data-name="' + esc(name.toLowerCase()) + '"><td>' + name + '<span class="used">' + Object.keys(USED[k] || {}).join(" · ") + '</span></td>' +
+          '<td class="price r">' + priceInput("pp-" + g[0].charAt(0) + n, k, name) + '</td></tr>';
+      }).join("");
+    }).join("");
+    filterPrices();
+  }
+  function filterPrices() {
+    var q = document.getElementById("priceFilter").value.trim().toLowerCase();
+    priceRows.querySelectorAll("tr[data-name]").forEach(function (tr) { tr.hidden = q !== "" && tr.dataset.name.indexOf(q) < 0; });
+  }
+  document.getElementById("priceFilter").addEventListener("input", filterPrices);
+
   /* ---------- Événements ---------- */
-  var RATES = [["successRate", "success"], ["procRate", "proc"], ["comboRate", "combo"]];
   RATES.forEach(function (p) {
     document.getElementById(p[0]).addEventListener("input", function (e) {
       var v = parse(e.target.value);
-      F()[p[1]] = v == null ? NaN : v;
-      save(); updateForge();
+      J()[p[1]] = v == null ? NaN : v;
+      save(); updateGear();
     });
   });
 
-  function cell(k) {
-    var p = k.split(":");
-    if (p[0] === "s") return { obj: state.alch[+p[1]], key: "sale", forge: false };
-    if (p[0] === "n") return { obj: state.alch[+p[1]], key: "qty", forge: false };
-    var rows = p[0] === "f" ? F().sheets[sheet][+p[1]] : state.alch[+p[1]].rows;
-    return { obj: rows[+p[2]], key: +p[3], forge: p[0] === "f" };
-  }
+  function refresh() { if (GEAR.indexOf(job) >= 0) updateGear(); updateAlch(); }
   document.addEventListener("input", function (e) {
-    var t = e.target;
-    if (t.dataset.k) {
-      var c = cell(t.dataset.k);
-      c.obj[c.key] = parse(t.value);
-      save(); if (c.forge) updateForge(); else updateAlch();
-    } else if (t.dataset.rate) {
-      var v = parse(t.value);
-      state.alch[+t.dataset.rate].success = v == null ? NaN : v;
-      save(); updateAlch();
+    var t = e.target, d = t.dataset || {}, v;
+    if (d.price !== undefined) {
+      state.prices[d.price] = parse(t.value);
+      syncPrice(d.price, t); save(); refresh();
+    } else if (d.q) {
+      v = parse(t.value); J().qty[d.q] = v == null ? 0 : v; save(); updateGear();
+    } else if (d.aq) {
+      var p = d.aq.split(":"); v = parse(t.value); state.alch[+p[0]].q[+p[1]] = v == null ? 0 : v; save(); updateAlch();
+    } else if (d.sale) {
+      state.alch[+d.sale].sale = parse(t.value); save(); updateAlch();
+    } else if (d.sold) {
+      v = parse(t.value); state.alch[+d.sold].qty = v == null ? 0 : v; save(); updateAlch();
+    } else if (d.rate) {
+      v = parse(t.value); state.alch[+d.rate].success = v == null ? NaN : v; save(); updateAlch();
     }
   });
   document.addEventListener("focusout", function (e) {
-    var t = e.target; if (!t.dataset || !t.dataset.k) return;
-    var c = cell(t.dataset.k);
-    t.value = val(c.obj[c.key]);
+    var t = e.target, d = t.dataset || {};
+    if (d.price !== undefined) t.value = val(price(d.price));
+    else if (d.q || d.aq || d.sale || d.sold) t.value = val(parse(t.value));
   });
   tiers.addEventListener("click", function (e) {
-    var b = e.target.closest("[data-use]"); if (!b) return;
-    var p = b.dataset.use.split(":");
-    var src = FORGE.findIndex(function (t) { return t.id === p[2]; });
-    var v = Math.round(forgeTotals()[src].avg);
+    var b = e.target.closest("[data-use]");
+    if (!b) return;
+    var p = b.dataset.use.split(":"), sh = curSheet();
+    var src = sh.tiers.map(function (t) { return t.id; }).indexOf(p[2]);
+    var v = Math.round(gearTotals()[src].out);
     if (isNaN(v)) return;
-    F().sheets[sheet][+p[0]][+p[1]][1] = v;
-    document.getElementById("p-" + p[0] + "-" + p[1]).value = fmt.format(v);
-    save(); updateForge();
+    var key = sh.tiers[+p[0]].rows[+p[1]][0];
+    state.prices[key] = v;
+    syncPrice(key, null); save(); refresh();
+  });
+  document.getElementById("sheetTabs").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-sheet]");
+    if (!b) return;
+    J().sheet = b.dataset.sheet;
+    save(); renderGear();
   });
 
   function setHash(h) { try { history.replaceState(null, "", "#" + h); } catch (e) {} }
@@ -546,44 +642,37 @@ footer { color: var(--muted); font-size: 13px; display: grid; gap: 4px; }
     document.querySelectorAll(".jobs button").forEach(function (b) {
       b.setAttribute("aria-selected", String(b.dataset.job === job));
     });
-    document.getElementById("panel-forge").hidden = job !== "forge";
-    document.getElementById("panel-alch").hidden = job !== "alch";
+    gearPanel.hidden = GEAR.indexOf(job) < 0;
+    alchPanel.hidden = job !== "alch";
+    document.getElementById("panel-prix").hidden = job !== "prix";
+    if (GEAR.indexOf(job) >= 0) renderGear();
+    if (job === "prix") renderPrices();
   }
   document.querySelectorAll(".jobs button").forEach(function (b) {
     b.addEventListener("click", function () {
       job = b.dataset.job;
-      setHash(job === "alch" ? "alchimie" : sheet);
+      setHash(HASH[job]);
       showJob();
-    });
-  });
-  document.querySelectorAll(".tabs button").forEach(function (b) {
-    b.addEventListener("click", function () {
-      sheet = b.dataset.sheet;
-      setHash(sheet);
-      renderForge();
     });
   });
 
   var resetBtn = document.getElementById("reset");
   var armed = false, timer;
-  function resetLabel() { return job === "alch" ? "Revenir aux valeurs de départ (alchimie)" : "Revenir aux valeurs de départ (forgeron)"; }
   resetBtn.addEventListener("click", function () {
     if (!armed) {
-      armed = true; resetBtn.textContent = "Confirmer : effacer mes modifications ?";
-      timer = setTimeout(function () { armed = false; resetBtn.textContent = resetLabel(); }, 4000);
+      armed = true; resetBtn.textContent = "Confirmer : effacer toutes mes modifications ?";
+      timer = setTimeout(function () { armed = false; resetBtn.textContent = "Revenir aux valeurs de départ"; }, 4000);
       return;
     }
-    clearTimeout(timer); armed = false;
-    var d = defaults();
-    if (job === "alch") { state.alch = d.alch; renderAlch(); } else { state.forge = d.forge; renderForge(); }
-    save(); resetBtn.textContent = resetLabel();
+    clearTimeout(timer); armed = false; resetBtn.textContent = "Revenir aux valeurs de départ";
+    state = fresh(); save(); renderAlch(); showJob();
   });
-  document.querySelector(".jobs").addEventListener("click", function () { if (!armed) resetBtn.textContent = resetLabel(); });
 
-  showJob();
-  renderForge();
+  var hash = location.hash.slice(1);
+  Object.keys(HASH).forEach(function (k) { if (HASH[k] === hash) job = k; });
+  if (hash === "guard" || hash === "arme") { job = "forge"; state.jobs.forge.sheet = hash; }
   renderAlch();
-  resetBtn.textContent = resetLabel();
+  showJob();
 })();
 </script>
 
