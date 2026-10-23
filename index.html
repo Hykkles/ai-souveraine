@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus+SC&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout : un établi de forge. Barre de réglages, échelle des paliers (résumé), puis une fiche par palier. */
+/* Layout : un établi par métier. Onglets métier, réglages, échelle des paliers (résumé), puis une fiche par craft. */
 :root {
   --bg: #eceef4;
   --surface: #ffffff;
@@ -19,6 +19,7 @@
   --line: #d5d8e4;
   --accent: #9a5a1f;
   --accent-soft: #f4e6d6;
+  --alch: #0e7a74;
   --g-blanc: #7b8091;
   --g-vert: #23864a;
   --g-bleu: #2a62c4;
@@ -31,14 +32,14 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #13141c; --surface: #1c1e29; --surface-2: #232633; --ink: #ebe7df; --muted: #9b9eb3;
-    --line: #2f3242; --accent: #dc9d55; --accent-soft: #3a2a1a;
+    --line: #2f3242; --accent: #dc9d55; --accent-soft: #3a2a1a; --alch: #4fcfc3;
     --g-blanc: #c5c9d4; --g-vert: #5ccf88; --g-bleu: #6ea6ff; --g-gold: #efc24a; --g-roi: #ff8752;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #13141c; --surface: #1c1e29; --surface-2: #232633; --ink: #ebe7df; --muted: #9b9eb3;
-  --line: #2f3242; --accent: #dc9d55; --accent-soft: #3a2a1a;
+  --line: #2f3242; --accent: #dc9d55; --accent-soft: #3a2a1a; --alch: #4fcfc3;
   --g-blanc: #c5c9d4; --g-vert: #5ccf88; --g-bleu: #6ea6ff; --g-gold: #efc24a; --g-roi: #ff8752;
   color-scheme: dark;
 }
@@ -53,8 +54,9 @@ body {
   padding-block: 28px 56px;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
-  display: grid; gap: 28px;
+  display: grid; gap: 24px;
 }
+.panel { display: grid; gap: 24px; }
 .num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
 
 header { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 16px; }
@@ -62,13 +64,28 @@ h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(28px, 
 h1 span { color: var(--accent); }
 .sub { margin: 6px 0 0; color: var(--muted); max-width: 60ch; }
 
-.controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.jobs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); }
+.jobs button {
+  font: 400 19px var(--font-display); color: var(--muted); background: none; border: 0;
+  border-bottom: 3px solid transparent; margin-bottom: -1px; padding: 8px 16px; cursor: pointer;
+}
+.jobs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--job); }
+.jobs button:hover { color: var(--ink); }
+
+.controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
 .tabs { display: inline-flex; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 3px; }
 .tabs button {
   font: 500 14px var(--font-body); color: var(--muted); background: transparent; border: 0;
   padding: 7px 18px; border-radius: 7px; cursor: pointer;
 }
 .tabs button[aria-selected="true"] { background: var(--accent); color: var(--surface); }
+.btn {
+  font: 500 13px var(--font-body); color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 8px; padding: 7px 12px; cursor: pointer;
+}
+.btn:hover { border-color: var(--accent); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
 .settings { display: grid; grid-template-columns: 1.3fr repeat(3, minmax(0, 1fr)); gap: 10px; }
 .rate { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: grid; gap: 6px; align-content: start; }
 .rate.main { border-color: var(--accent); background: var(--accent-soft); }
@@ -78,19 +95,11 @@ h1 span { color: var(--accent); }
 .rate input.in { font-size: 18px; max-width: 170px; }
 .rate.main input.in { background: var(--surface); }
 .rate .small { font-size: 12px; color: var(--muted); }
-.btn {
-  font: 500 13px var(--font-body); color: var(--ink); background: var(--surface);
-  border: 1px solid var(--line); border-radius: 8px; padding: 7px 12px; cursor: pointer;
-}
-.btn:hover { border-color: var(--accent); }
-button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-.notice {
-  background: var(--accent-soft); border-radius: 10px; padding: 12px 16px; font-size: 14px;
-}
+.notice { background: var(--accent-soft); border-radius: 10px; padding: 12px 16px; font-size: 14px; margin: 0; }
 
 /* Échelle des paliers */
-.ladder { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+.ladder { display: grid; grid-template-columns: repeat(var(--cols, 5), minmax(0, 1fr)); gap: 10px; }
 .rung {
   background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--grade);
   border-radius: 10px; padding: 12px 14px; display: grid; gap: 4px; text-decoration: none; color: inherit;
@@ -105,16 +114,19 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 .tiers { display: grid; gap: 18px; }
 .tier { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; scroll-margin-top: 16px; }
 .tier-head {
-  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px;
   padding: 14px 18px; border-bottom: 1px solid var(--line);
 }
-.tier-head h2 { font-family: var(--font-display); font-weight: 400; font-size: 21px; margin: 0; display: flex; align-items: center; gap: 10px; }
+.tier-head h2 { font-family: var(--font-display); font-weight: 400; font-size: 21px; margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .chip {
   font: 600 11px var(--font-body); letter-spacing: .08em; text-transform: uppercase;
   color: var(--grade); border: 1px solid var(--grade); border-radius: 999px; padding: 2px 9px;
 }
 .tier-head .proc { color: var(--muted); font-size: 13px; }
 .tier-head .proc b { color: var(--ink); font-weight: 500; }
+.tier-head label.proc { display: inline-flex; align-items: center; gap: 8px; }
+.tier-head label.proc input.in { width: 96px; }
+.tier-note { margin: 0; padding: 10px 18px; font-size: 13px; color: var(--muted); border-bottom: 1px solid var(--line); }
 .scroll { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; min-width: 520px; }
 th, td { padding: 8px 18px; text-align: left; vertical-align: middle; }
@@ -134,19 +146,25 @@ input.in:hover { border-color: var(--muted); }
 td.qty { width: 110px; }
 td.price { width: 190px; }
 td.cost { width: 170px; }
-tr.total td { font-weight: 600; background: var(--surface-2); }
 tr.raw td { color: var(--muted); }
+tr.total td { font-weight: 600; background: var(--surface-2); }
 tr.avg td { font-weight: 600; color: var(--accent); }
+.missing { font-size: 12px; color: var(--g-roi); }
+tr.gain td { font-weight: 600; }
+tr.split td { border-top: 2px solid var(--line); }
+[data-sign="pos"] { color: var(--g-vert); }
+[data-sign="neg"] { color: var(--g-roi); }
 
 footer { color: var(--muted); font-size: 13px; display: grid; gap: 4px; }
 
 @media (max-width: 760px) {
   .ladder { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .ladder .rung:last-child { grid-column: 1 / -1; }
+  .ladder.odd .rung:last-child { grid-column: 1 / -1; }
   .settings { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .settings .main { grid-column: 1 / -1; }
   th, td { padding: 8px 12px; }
   .tier-head { padding: 12px; }
+  .tier-note { padding: 10px 12px; }
 }
 @media (prefers-reduced-motion: no-preference) {
   html { scroll-behavior: smooth; }
@@ -157,54 +175,76 @@ footer { color: var(--muted); font-size: 13px; display: grid; gap: 4px; }
   <header>
     <div>
       <h1>Forge <span>Aion 2</span></h1>
-      <p class="sub">Coût de craft par palier, du blanc au Roi dragon noir. Modifie une quantité ou un prix et tout se recalcule.</p>
+      <p class="sub">Coût de craft par métier. Modifie une quantité, un prix ou un taux et tout se recalcule.</p>
     </div>
+    <button class="btn" id="reset" type="button">Revenir aux valeurs de départ</button>
+  </header>
+
+  <nav class="jobs" role="tablist" aria-label="Métier">
+    <button id="job-forge" role="tab" aria-selected="true" data-job="forge" style="--job: var(--accent)">Forgeron</button>
+    <button id="job-alch" role="tab" aria-selected="false" data-job="alch" style="--job: var(--alch)">Alchimie</button>
+  </nav>
+
+  <section class="panel" id="panel-forge">
     <div class="controls">
       <div class="tabs" role="tablist" aria-label="Équipement">
         <button id="tab-arme" role="tab" aria-selected="true" data-sheet="arme">Arme</button>
         <button id="tab-guard" role="tab" aria-selected="false" data-sheet="guard">Guard</button>
       </div>
-      <button class="btn" id="reset" type="button">Revenir aux valeurs du fichier</button>
     </div>
-  </header>
 
-  <section class="settings" aria-label="Taux de réussite">
-    <label class="rate main" for="successRate">
-      <span class="lbl">Taux de réussite du craft</span>
-      <span class="row"><input id="successRate" class="in" type="text" inputmode="decimal"> %</span>
-      <span class="small">Dépend de ton niveau de métier</span>
-    </label>
-    <label class="rate" for="procRate">
-      <span class="lbl">Chance de proc</span>
-      <span class="row"><input id="procRate" class="in" type="text" inputmode="decimal"> %</span>
-      <span class="small">Obtenir la version Splendent</span>
-    </label>
-    <label class="rate" for="comboRate">
-      <span class="lbl">Réussite du combo</span>
-      <span class="row"><input id="comboRate" class="in" type="text" inputmode="decimal"> %</span>
-      <span class="small">Après le proc</span>
-    </label>
-    <div class="rate">
-      <span class="lbl">Multiplicateurs</span>
-      <span class="row num">craft ×<span id="multCraft"></span></span>
-      <span class="row num">proc ×<span id="multProc"></span></span>
-    </div>
+    <section class="settings" aria-label="Taux de réussite">
+      <label class="rate main" for="successRate">
+        <span class="lbl">Taux de réussite du craft</span>
+        <span class="row"><input id="successRate" class="in" type="text" inputmode="decimal"> %</span>
+        <span class="small">Dépend de ton niveau de métier</span>
+      </label>
+      <label class="rate" for="procRate">
+        <span class="lbl">Chance de proc</span>
+        <span class="row"><input id="procRate" class="in" type="text" inputmode="decimal"> %</span>
+        <span class="small">Obtenir la version Splendent</span>
+      </label>
+      <label class="rate" for="comboRate">
+        <span class="lbl">Réussite du combo</span>
+        <span class="row"><input id="comboRate" class="in" type="text" inputmode="decimal"> %</span>
+        <span class="small">Après le proc</span>
+      </label>
+      <div class="rate">
+        <span class="lbl">Multiplicateurs</span>
+        <span class="row num">craft ×<span id="multCraft"></span></span>
+        <span class="row num">proc ×<span id="multProc"></span></span>
+      </div>
+    </section>
+
+    <p class="notice" id="guardNotice" hidden>Les prix du guard sont pour l'instant ceux de l'arme. Les quantités suivent les recettes du guard, identiques à celles de l'arme.</p>
+
+    <nav class="ladder odd" id="ladder" aria-label="Résumé par palier"></nav>
+    <section class="tiers" id="tiers"></section>
+
+    <footer>
+      <span>Coût total craft = matériaux ÷ taux de réussite. Coût moyen proc = matériaux ÷ (réussite × proc × combo). Un craft raté consomme tous les matériaux.</span>
+      <span>Valeurs de départ reprises de « craft arme.xlsx ».</span>
+    </footer>
   </section>
 
-  <p class="notice" id="guardNotice" hidden>Les prix du guard sont pour l'instant ceux de l'arme. Les quantités suivent les recettes du guard, identiques à celles de l'arme.</p>
+  <section class="panel" id="panel-alch" hidden>
+    <p class="notice">Recettes côté Asmodien (papier d'Asvata). Remplis le prix des matériaux et le prix de vente du parchemin pour voir ton gain. Le taux de réussite se règle sur chaque parchemin : 72,9 % au niveau de maîtrise requis, plus quand ton niveau le dépasse.</p>
 
-  <nav class="ladder" id="ladder" aria-label="Résumé par palier"></nav>
-  <section class="tiers" id="tiers"></section>
+    <nav class="ladder" id="alchLadder" aria-label="Résumé par parchemin" style="--cols: 4"></nav>
+    <section class="tiers" id="alchTiers"></section>
 
-  <footer>
-    <span>Coût total craft = matériaux ÷ taux de réussite. Coût moyen proc = matériaux ÷ (réussite × proc × combo). Un craft raté consomme tous les matériaux.</span>
-    <span>Valeurs de départ reprises de « craft arme.xlsx ». Tes modifications restent dans ce navigateur.</span>
-  </footer>
+    <footer>
+      <span>Coût par parchemin = matériaux ÷ taux de réussite. Un craft raté consomme tous les matériaux.</span>
+      <span>Gain par parchemin vendu = prix de vente − coût par parchemin, sans la taxe de l'hôtel des ventes.</span>
+      <span>Pour X parchemins : investissement = coût par parchemin × X, gain total = gain par parchemin × X, retour sur investissement = gain ÷ investissement.</span>
+      <span>Recettes trouvées sur metabot.gg et dbaion2.ru, taux sur aion2data.com. À vérifier en jeu.</span>
+    </footer>
+  </section>
 </div>
 
 <script>
 (function () {
-  var TIERS = [
+  var FORGE = [
     { id: "blanc", title: "Craft blanc", grade: "Blanc", color: "--g-blanc",
       rows: [["Lingot", 3, 2750], ["Pierre de raffinage", 5, 799], ["Od", 2, 5200]] },
     { id: "vert", title: "Craft vert", grade: "Vert", color: "--g-vert",
@@ -220,66 +260,107 @@ footer { color: var(--muted); font-size: 13px; display: grid; gap: 4px; }
              ["Minerai orichalque", 12, 560000], ["Od", 7, 570000]] }
   ];
   var SHEETS = { arme: { X: "Arme", x: "arme" }, guard: { X: "Guard", x: "guard" } };
-  var KEY = "forge-aion2-v1";
+
+  var ALCH = [
+    { id: "courage", short: "Courage", title: "Parchemin de courage supérieur", lvl: 70, best: 90.9,
+      rows: [["Parchemin de courage (lié)", 1], ["Poudre de saphir", 3], ["Papier d'Asvata", 1], ["Encre professionnelle (liée)", 1]] },
+    { id: "course", short: "Course", title: "Parchemin de course supérieur", lvl: 65, best: 90.9,
+      rows: [["Parchemin de course (lié)", 1], ["Poudre de rubis", 3], ["Papier d'Asvata", 1], ["Encre professionnelle (liée)", 1]] },
+    { id: "protection", short: "Protection", title: "Parchemin de protection supérieur", lvl: 75, best: 88.1,
+      note: "Recette trouvée sous le nom anglais « Superior Benediction Scroll » (PV max +15 %, PM max +200 pendant 5 min). Vérifie que c'est bien ton parchemin de protection.",
+      rows: [["Parchemin de protection (lié)", 1], ["Poudre de diamant", 3], ["Papier d'Asvata", 1], ["Encre professionnelle (liée)", 1]] },
+    { id: "resist", short: "Résistance", title: "Parchemin de résistance aux altérations d'état supérieur", lvl: 95, best: 85.2,
+      note: "Je n'ai trouvé que la recette du parchemin de résistance aux altérations d'état, sans version « supérieure ». C'est elle qui est affichée.",
+      rows: [["Poudre de diamant", 3], ["Poudre de pierre spirituelle", 5], ["Papier d'Asvata", 1], ["Encre exceptionnelle (liée)", 1]] }
+  ];
+  var ALCH_SUCCESS = 72.9;
+  var KEY = "forge-aion2-v2";
 
   function defaults() {
-    var s = { success: 94.639789, proc: 25, combo: 97.397412, sheets: {} };
+    var f = { success: 94.639789, proc: 25, combo: 97.397412, sheets: {} };
     Object.keys(SHEETS).forEach(function (k) {
-      s.sheets[k] = TIERS.map(function (t) { return t.rows.map(function (r) { return [r[1], r[2]]; }); });
+      f.sheets[k] = FORGE.map(function (t) { return t.rows.map(function (r) { return [r[1], r[2]]; }); });
     });
-    return s;
+    var a = ALCH.map(function (r) {
+      return { success: ALCH_SUCCESS, sale: null, qty: 10, rows: r.rows.map(function (x) { return [x[1], null]; }) };
+    });
+    return { forge: f, alch: a };
   }
   var state = defaults();
   try {
     var saved = JSON.parse(localStorage.getItem(KEY) || "null");
-    if (saved && saved.sheets && saved.sheets.arme && saved.sheets.guard) state = saved;
+    if (saved && saved.forge && saved.forge.sheets && saved.alch && saved.alch.length === ALCH.length) {
+      state = saved;
+    } else {
+      var old = JSON.parse(localStorage.getItem("forge-aion2-v1") || "null");
+      if (old && old.sheets && old.sheets.arme && old.sheets.guard) state.forge = old;
+    }
   } catch (e) {}
-  ["success", "proc", "combo"].forEach(function (k) { if (typeof state[k] !== "number") state[k] = defaults()[k]; });
+  var base = defaults();
+  ["success", "proc", "combo"].forEach(function (k) { if (typeof state.forge[k] !== "number") state.forge[k] = base.forge[k]; });
+  state.alch.forEach(function (r) {
+    if (typeof r.success !== "number") r.success = ALCH_SUCCESS;
+    if (typeof r.qty !== "number") r.qty = 10;
+  });
   function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
 
-  var current = location.hash === "#guard" ? "guard" : "arme";
+  var hash = location.hash.slice(1);
+  var job = hash === "alchimie" ? "alch" : "forge";
+  var sheet = hash === "guard" ? "guard" : "arme";
+
   var fmt = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 });
+  var fmt2 = new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  var fmt1 = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 1 });
+  var pct = new Intl.NumberFormat("fr-FR", { style: "percent", maximumFractionDigits: 1 });
   function show(n) { return n == null || isNaN(n) ? "—" : fmt.format(Math.round(n)); }
   function parse(v) {
     var d = String(v).replace(/[^\d.,]/g, "").replace(",", ".");
     return d === "" ? null : Number(d);
   }
-  function label(s) { return s.replace("{X}", SHEETS[current].X).replace("{x}", SHEETS[current].x); }
-  function craftFactor() { var s = state.success; return s > 0 ? 100 / s : NaN; }
-  function factor() {
-    var s = state.success, p = state.proc, c = state.combo;
+  function rate(v) { return v == null || isNaN(v) ? "" : String(v).replace(".", ","); }
+  function val(v) { return v == null ? "" : fmt.format(v); }
+  function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;"); }
+  function input(id, k, v, aria, ph) {
+    return '<input class="in" id="' + id + '" data-k="' + k + '" inputmode="numeric"' + (ph ? ' placeholder="' + ph + '"' : "") +
+      ' aria-label="' + esc(aria) + '" value="' + val(v) + '">';
+  }
+  function sum(rows) { return rows.reduce(function (a, r) { return a + (r[0] || 0) * (r[1] || 0); }, 0); }
+
+  /* ---------- Forgeron ---------- */
+  var F = function () { return state.forge; };
+  function label(s) { return s.replace("{X}", SHEETS[sheet].X).replace("{x}", SHEETS[sheet].x); }
+  function craftFactor() { var s = F().success; return s > 0 ? 100 / s : NaN; }
+  function procFactor() {
+    var s = F().success, p = F().proc, c = F().combo;
     return s > 0 && p > 0 && c > 0 ? 1e6 / (s * p * c) : NaN;
   }
-  var fmt2 = new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  function rate(v) { return v == null || isNaN(v) ? "" : String(v).replace(".", ","); }
-
-  function totals() {
-    return state.sheets[current].map(function (rows) {
-      var sum = rows.reduce(function (a, r) { return a + (r[0] || 0) * (r[1] || 0); }, 0);
-      return { raw: sum, craft: sum * craftFactor(), avg: sum * factor() };
+  function forgeTotals() {
+    return F().sheets[sheet].map(function (rows) {
+      var raw = sum(rows);
+      return { raw: raw, craft: raw * craftFactor(), avg: raw * procFactor() };
     });
   }
 
   var ladder = document.getElementById("ladder");
   var tiers = document.getElementById("tiers");
 
-  function render() {
-    var data = state.sheets[current];
-    ladder.innerHTML = TIERS.map(function (t) {
+  function renderForge() {
+    var data = F().sheets[sheet];
+    ladder.innerHTML = FORGE.map(function (t) {
       return '<a class="rung" href="#t-' + t.id + '" style="--grade: var(' + t.color + ')">' +
         '<span class="name">' + t.grade + '</span>' +
         '<span class="lbl">Coût moyen proc</span><span class="big num" data-avg="' + t.id + '"></span>' +
         '<span class="small">1 craft : <span class="num" data-craft="' + t.id + '"></span></span></a>';
     }).join("");
 
-    tiers.innerHTML = TIERS.map(function (t, ti) {
+    tiers.innerHTML = FORGE.map(function (t, ti) {
       var rows = t.rows.map(function (r, ri) {
-        var v = data[ti][ri];
+        var v = data[ti][ri], name = label(r[0]);
         var hint = r[3] ? '<span class="hint">Proc ' + r[3] + ' calculé : <button type="button" data-use="' + ti + ':' + ri + ':' + r[3] + '"><span class="num" data-avg="' + r[3] + '"></span></button></span>' : "";
-        return '<tr><td>' + label(r[0]) + hint + '</td>' +
-          '<td class="qty r"><input class="in" id="q-' + ti + '-' + ri + '" data-k="' + ti + ':' + ri + ':0" inputmode="numeric" aria-label="Quantité ' + label(r[0]) + '" value="' + (v[0] == null ? "" : fmt.format(v[0])) + '"></td>' +
-          '<td class="price r"><input class="in" id="p-' + ti + '-' + ri + '" data-k="' + ti + ':' + ri + ':1" inputmode="numeric" placeholder="prix ?" aria-label="Valeur unitaire ' + label(r[0]) + '" value="' + (v[1] == null ? "" : fmt.format(v[1])) + '"></td>' +
-          '<td class="cost r num" data-cost="' + ti + ':' + ri + '"></td></tr>';
+        return '<tr><td>' + name + hint + '</td>' +
+          '<td class="qty r">' + input("q-" + ti + "-" + ri, "f:" + ti + ":" + ri + ":0", v[0], "Quantité " + name) + '</td>' +
+          '<td class="price r">' + input("p-" + ti + "-" + ri, "f:" + ti + ":" + ri + ":1", v[1], "Valeur unitaire " + name, "prix ?") + '</td>' +
+          '<td class="cost r num" data-cost="f:' + ti + ':' + ri + '"></td></tr>';
       }).join("");
       return '<article class="tier" id="t-' + t.id + '" style="--grade: var(' + t.color + ')">' +
         '<div class="tier-head"><h2>' + label(t.title) + ' <span class="chip">' + t.grade + '</span></h2>' +
@@ -293,87 +374,216 @@ footer { color: var(--muted); font-size: 13px; display: grid; gap: 4px; }
     }).join("");
 
     document.querySelectorAll(".tabs button").forEach(function (b) {
-      b.setAttribute("aria-selected", String(b.dataset.sheet === current));
+      b.setAttribute("aria-selected", String(b.dataset.sheet === sheet));
     });
-    document.getElementById("guardNotice").hidden = current !== "guard";
-    [["successRate", "success"], ["procRate", "proc"], ["comboRate", "combo"]].forEach(function (p) {
+    document.getElementById("guardNotice").hidden = sheet !== "guard";
+    RATES.forEach(function (p) {
       var el = document.getElementById(p[0]);
-      if (document.activeElement !== el) el.value = rate(state[p[1]]);
+      if (document.activeElement !== el) el.value = rate(F()[p[1]]);
     });
-    update();
+    updateForge();
   }
 
-  function update() {
-    var data = state.sheets[current];
-    var tot = totals();
+  function updateForge() {
+    var data = F().sheets[sheet];
+    var tot = forgeTotals();
     data.forEach(function (rows, ti) {
       rows.forEach(function (v, ri) {
-        var el = tiers.querySelector('[data-cost="' + ti + ':' + ri + '"]');
+        var el = tiers.querySelector('[data-cost="f:' + ti + ':' + ri + '"]');
         if (el) el.textContent = v[1] == null ? "—" : show((v[0] || 0) * v[1]);
       });
     });
-    TIERS.forEach(function (t, ti) {
-      document.querySelectorAll('[data-craft="' + t.id + '"]').forEach(function (el) { el.textContent = show(tot[ti].craft); });
-      document.querySelectorAll('[data-raw="' + t.id + '"]').forEach(function (el) { el.textContent = show(tot[ti].raw); });
-      document.querySelectorAll('[data-avg="' + t.id + '"]').forEach(function (el) { el.textContent = show(tot[ti].avg); });
+    FORGE.forEach(function (t, ti) {
+      tiers.querySelectorAll('[data-raw="' + t.id + '"]').forEach(function (el) { el.textContent = show(tot[ti].raw); });
+      document.querySelectorAll('#panel-forge [data-craft="' + t.id + '"]').forEach(function (el) { el.textContent = show(tot[ti].craft); });
+      document.querySelectorAll('#panel-forge [data-avg="' + t.id + '"]').forEach(function (el) { el.textContent = show(tot[ti].avg); });
     });
-    var mc = craftFactor(), mp = factor();
+    var mc = craftFactor(), mp = procFactor();
     document.getElementById("multCraft").textContent = isNaN(mc) ? "—" : fmt2.format(mc);
     document.getElementById("multProc").textContent = isNaN(mp) ? "—" : fmt2.format(mp);
   }
 
-  tiers.addEventListener("input", function (e) {
-    var k = e.target.dataset.k; if (!k) return;
-    var p = k.split(":").map(Number);
-    state.sheets[current][p[0]][p[1]][p[2]] = parse(e.target.value);
-    save(); update();
+  /* ---------- Alchimie ---------- */
+  var alchLadder = document.getElementById("alchLadder");
+  var alchTiers = document.getElementById("alchTiers");
+
+  function alchTotals() {
+    return state.alch.map(function (r) {
+      var raw = sum(r.rows);
+      var priced = r.rows.filter(function (x) { return x[1] != null; }).length;
+      var real = priced ? raw * (r.success > 0 ? 100 / r.success : NaN) : NaN;
+      var n = r.qty || 0, sale = r.sale == null ? NaN : r.sale;
+      return { raw: priced ? raw : NaN, real: real, gain: sale - real, missing: r.rows.length - priced,
+        tries: r.success > 0 ? n * 100 / r.success : NaN, inv: real * n, rev: sale * n, tot: (sale - real) * n,
+        roi: real > 0 ? (sale - real) / real : NaN };
+    });
+  }
+
+  function renderAlch() {
+    alchLadder.innerHTML = ALCH.map(function (t, i) {
+      return '<a class="rung" href="#a-' + t.id + '" style="--grade: var(--alch)">' +
+        '<span class="name">' + t.short + '</span>' +
+        '<span class="lbl">Coût par parchemin</span><span class="big num" data-areal="' + i + '"></span>' +
+        '<span class="small">Maîtrise ' + t.lvl + ' · réussite <span class="num" data-arate="' + i + '"></span></span>' +
+        '<span class="small">Gain / parchemin : <span class="num" data-again="' + i + '"></span></span>' +
+        '<span class="small">Gain pour <span class="num" data-aqty="' + i + '"></span> : <span class="num" data-atot="' + i + '"></span></span></a>';
+    }).join("");
+
+    alchTiers.innerHTML = ALCH.map(function (t, i) {
+      var r = state.alch[i];
+      var rows = t.rows.map(function (m, ri) {
+        var v = r.rows[ri];
+        return '<tr><td>' + m[0] + '</td>' +
+          '<td class="qty r">' + input("aq-" + i + "-" + ri, "a:" + i + ":" + ri + ":0", v[0], "Quantité " + m[0]) + '</td>' +
+          '<td class="price r">' + input("ap-" + i + "-" + ri, "a:" + i + ":" + ri + ":1", v[1], "Valeur unitaire " + m[0], "prix ?") + '</td>' +
+          '<td class="cost r num" data-cost="a:' + i + ':' + ri + '"></td></tr>';
+      }).join("");
+      return '<article class="tier" id="a-' + t.id + '" style="--grade: var(--alch)">' +
+        '<div class="tier-head"><h2>' + t.title + ' <span class="chip">Maîtrise ' + t.lvl + '</span></h2>' +
+        '<label class="proc" for="as-' + i + '">Réussite <input class="in" id="as-' + i + '" data-rate="' + i + '" inputmode="decimal" value="' + rate(r.success) + '"> %' +
+        '<span class="small">(max ' + rate(t.best) + ' %)</span></label></div>' +
+        (t.note ? '<p class="tier-note">' + t.note + '</p>' : "") +
+        '<div class="scroll"><table><thead><tr><th>Matériau</th><th class="r">Quantité</th><th class="r">Valeur unitaire</th><th class="r">Coût total</th></tr></thead>' +
+        '<tbody>' + rows +
+        '<tr class="raw"><td colspan="3">Coût des matériaux <span class="missing" data-amiss="' + i + '"></span></td><td class="r num" data-araw="' + i + '"></td></tr>' +
+        '<tr class="avg"><td colspan="3">Coût par parchemin (échecs compris)</td><td class="r num" data-areal="' + i + '"></td></tr>' +
+        '<tr class="sale"><td colspan="3">Prix de vente du parchemin</td><td class="price r">' + input("av-" + i, "s:" + i, r.sale, "Prix de vente " + t.title, "prix ?") + '</td></tr>' +
+        '<tr class="gain"><td colspan="3">Gain par parchemin vendu</td><td class="r num" data-again="' + i + '"></td></tr>' +
+        '<tr class="split"><td colspan="3">Nombre de parchemins à vendre</td><td class="price r">' + input("an-" + i, "n:" + i, r.qty, "Nombre de parchemins à vendre " + t.title) + '</td></tr>' +
+        '<tr class="raw"><td colspan="3">Crafts à lancer en moyenne</td><td class="r num" data-atries="' + i + '"></td></tr>' +
+        '<tr class="raw"><td colspan="3">Investissement (matériaux, échecs compris)</td><td class="r num" data-ainv="' + i + '"></td></tr>' +
+        '<tr class="raw"><td colspan="3">Recette des ventes</td><td class="r num" data-arev="' + i + '"></td></tr>' +
+        '<tr class="gain"><td colspan="3">Gain total</td><td class="r num" data-atot="' + i + '"></td></tr>' +
+        '<tr class="gain"><td colspan="3">Retour sur investissement</td><td class="r num" data-aroi="' + i + '"></td></tr>' +
+        '</tbody></table></div></article>';
+    }).join("");
+    updateAlch();
+  }
+
+  function put(sel, text, g) {
+    document.querySelectorAll(sel).forEach(function (el) {
+      el.textContent = text;
+      if (g !== undefined) el.dataset.sign = isNaN(g) ? "" : g >= 0 ? "pos" : "neg";
+    });
+  }
+  function signed(v, f) { return isNaN(v) ? "—" : (v > 0 ? "+" : "") + f(v); }
+
+  function updateAlch() {
+    var tot = alchTotals();
+    state.alch.forEach(function (r, i) {
+      r.rows.forEach(function (v, ri) {
+        var el = alchTiers.querySelector('[data-cost="a:' + i + ':' + ri + '"]');
+        if (el) el.textContent = v[1] == null ? "—" : show((v[0] || 0) * v[1]);
+      });
+      document.querySelectorAll('[data-araw="' + i + '"]').forEach(function (el) { el.textContent = show(tot[i].raw); });
+      document.querySelectorAll('[data-areal="' + i + '"]').forEach(function (el) { el.textContent = show(tot[i].real); });
+      document.querySelectorAll('[data-arate="' + i + '"]').forEach(function (el) { el.textContent = isNaN(r.success) ? "—" : rate(r.success) + " %"; });
+      document.querySelectorAll('[data-again="' + i + '"]').forEach(function (el) {
+        var g = tot[i].gain;
+        el.textContent = isNaN(g) ? "—" : (g > 0 ? "+" : "") + show(g);
+        el.dataset.sign = isNaN(g) ? "" : g >= 0 ? "pos" : "neg";
+      });
+      var T = tot[i];
+      put('[data-aqty="' + i + '"]', fmt.format(r.qty || 0));
+      put('[data-atries="' + i + '"]', isNaN(T.tries) ? "—" : fmt1.format(T.tries));
+      put('[data-ainv="' + i + '"]', show(T.inv));
+      put('[data-arev="' + i + '"]', show(T.rev));
+      put('[data-atot="' + i + '"]', signed(T.tot, show), T.tot);
+      put('[data-aroi="' + i + '"]', signed(T.roi, pct.format), T.roi);
+      document.querySelectorAll('[data-amiss="' + i + '"]').forEach(function (el) {
+        el.textContent = tot[i].missing ? "· " + tot[i].missing + " prix manquant" + (tot[i].missing > 1 ? "s" : "") : "";
+      });
+    });
+  }
+
+  /* ---------- Événements ---------- */
+  var RATES = [["successRate", "success"], ["procRate", "proc"], ["comboRate", "combo"]];
+  RATES.forEach(function (p) {
+    document.getElementById(p[0]).addEventListener("input", function (e) {
+      var v = parse(e.target.value);
+      F()[p[1]] = v == null ? NaN : v;
+      save(); updateForge();
+    });
   });
-  tiers.addEventListener("focusout", function (e) {
-    var k = e.target.dataset.k; if (!k) return;
-    var p = k.split(":").map(Number);
-    var v = state.sheets[current][p[0]][p[1]][p[2]];
-    e.target.value = v == null ? "" : fmt.format(v);
+
+  function cell(k) {
+    var p = k.split(":");
+    if (p[0] === "s") return { obj: state.alch[+p[1]], key: "sale", forge: false };
+    if (p[0] === "n") return { obj: state.alch[+p[1]], key: "qty", forge: false };
+    var rows = p[0] === "f" ? F().sheets[sheet][+p[1]] : state.alch[+p[1]].rows;
+    return { obj: rows[+p[2]], key: +p[3], forge: p[0] === "f" };
+  }
+  document.addEventListener("input", function (e) {
+    var t = e.target;
+    if (t.dataset.k) {
+      var c = cell(t.dataset.k);
+      c.obj[c.key] = parse(t.value);
+      save(); if (c.forge) updateForge(); else updateAlch();
+    } else if (t.dataset.rate) {
+      var v = parse(t.value);
+      state.alch[+t.dataset.rate].success = v == null ? NaN : v;
+      save(); updateAlch();
+    }
+  });
+  document.addEventListener("focusout", function (e) {
+    var t = e.target; if (!t.dataset || !t.dataset.k) return;
+    var c = cell(t.dataset.k);
+    t.value = val(c.obj[c.key]);
   });
   tiers.addEventListener("click", function (e) {
     var b = e.target.closest("[data-use]"); if (!b) return;
     var p = b.dataset.use.split(":");
-    var src = TIERS.findIndex(function (t) { return t.id === p[2]; });
-    var val = Math.round(totals()[src].avg);
-    if (isNaN(val)) return;
-    state.sheets[current][+p[0]][+p[1]][1] = val;
-    document.getElementById("p-" + p[0] + "-" + p[1]).value = fmt.format(val);
-    save(); update();
+    var src = FORGE.findIndex(function (t) { return t.id === p[2]; });
+    var v = Math.round(forgeTotals()[src].avg);
+    if (isNaN(v)) return;
+    F().sheets[sheet][+p[0]][+p[1]][1] = v;
+    document.getElementById("p-" + p[0] + "-" + p[1]).value = fmt.format(v);
+    save(); updateForge();
   });
 
-  [["successRate", "success"], ["procRate", "proc"], ["comboRate", "combo"]].forEach(function (p) {
-    document.getElementById(p[0]).addEventListener("input", function (e) {
-      var v = parse(e.target.value);
-      state[p[1]] = v == null ? NaN : v;
-      save(); update();
+  function setHash(h) { try { history.replaceState(null, "", "#" + h); } catch (e) {} }
+  function showJob() {
+    document.querySelectorAll(".jobs button").forEach(function (b) {
+      b.setAttribute("aria-selected", String(b.dataset.job === job));
+    });
+    document.getElementById("panel-forge").hidden = job !== "forge";
+    document.getElementById("panel-alch").hidden = job !== "alch";
+  }
+  document.querySelectorAll(".jobs button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      job = b.dataset.job;
+      setHash(job === "alch" ? "alchimie" : sheet);
+      showJob();
     });
   });
-
   document.querySelectorAll(".tabs button").forEach(function (b) {
     b.addEventListener("click", function () {
-      current = b.dataset.sheet;
-      try { history.replaceState(null, "", "#" + current); } catch (e) {}
-      render();
+      sheet = b.dataset.sheet;
+      setHash(sheet);
+      renderForge();
     });
   });
 
   var resetBtn = document.getElementById("reset");
   var armed = false, timer;
+  function resetLabel() { return job === "alch" ? "Revenir aux valeurs de départ (alchimie)" : "Revenir aux valeurs de départ (forgeron)"; }
   resetBtn.addEventListener("click", function () {
     if (!armed) {
-      armed = true; resetBtn.textContent = "Confirmer : tout effacer ?";
-      timer = setTimeout(function () { armed = false; resetBtn.textContent = "Revenir aux valeurs du fichier"; }, 4000);
+      armed = true; resetBtn.textContent = "Confirmer : effacer mes modifications ?";
+      timer = setTimeout(function () { armed = false; resetBtn.textContent = resetLabel(); }, 4000);
       return;
     }
-    clearTimeout(timer); armed = false; resetBtn.textContent = "Revenir aux valeurs du fichier";
-    state = defaults(); save(); render();
+    clearTimeout(timer); armed = false;
+    var d = defaults();
+    if (job === "alch") { state.alch = d.alch; renderAlch(); } else { state.forge = d.forge; renderForge(); }
+    save(); resetBtn.textContent = resetLabel();
   });
+  document.querySelector(".jobs").addEventListener("click", function () { if (!armed) resetBtn.textContent = resetLabel(); });
 
-  render();
+  showJob();
+  renderForge();
+  renderAlch();
+  resetBtn.textContent = resetLabel();
 })();
 </script>
 
